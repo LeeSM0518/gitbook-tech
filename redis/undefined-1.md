@@ -110,11 +110,7 @@ __
 
 
 
-## 3. AOF (Append Only File)
-
-
-
-## 10.4. AOF(Append Only File)
+## 3. AOF(Append Only File)
 
 `AOF(Append Only File)` 는 레디스의 데이터 영속화의 기능으로써, 레디스가 수신하는 **모든 쓰기 명령을 aof 파일에 기록**하여 데이터를 보관한다.&#x20;
 
