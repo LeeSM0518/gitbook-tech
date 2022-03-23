@@ -1,6 +1,6 @@
 ---
-cover: ../.gitbook/assets/Frame 75.png
-coverY: 222.98553948832037
+cover: ../.gitbook/assets/Frame 81.png
+coverY: 0
 ---
 
 # 레디스 튜닝

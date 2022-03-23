@@ -1,6 +1,6 @@
 ---
-cover: .gitbook/assets/Frame 75.png
-coverY: 233.12124582869856
+cover: .gitbook/assets/Frame 81.png
+coverY: 0
 ---
 
 # 레디스 운영 시 고려사항
