@@ -5,7 +5,7 @@ coverY: 0
 
 # Spring Events
 
-## 1. Overview
+## 1. 개요
 
 _**ApplicationContext**_를 활용하여 이벤트를 발행할 수 있다.
 
@@ -15,13 +15,13 @@ _**ApplicationContext**_를 활용하여 이벤트를 발행할 수 있다.
 * 발행자 클래스에 _**ApplicationEventPublisher**_ 객체를 주입해야 한다.
 * 수신자 클래스는 _**ApplicationListener**_ 인터페이스를 구현해야 한다.
 
-## 2. Custom Event
+## 2. 사용자 정의 이벤트
 
 Spring을 사용하여 동기적으로 사용자 정의 이벤트를 생성하고 발행할 수 있다.
 
 이로 인해 구독자의 로직이 발행자의 트랜잭션에 속하여 동작할 수 있는 등의 여러 장점이 있다.
 
-### 2.1. Simple Application Event
+### 2.1. 이벤트
 
 간단한 이벤트 클래스를 구현해보자.
 
@@ -32,7 +32,7 @@ class CustomSpringEvent(
 ) : ApplicationEvent(source)
 ```
 
-### 2.2. Publisher
+### 2.2. 발행자
 
 이벤트 발행자 클래스를 구현해보자.
 
@@ -54,7 +54,7 @@ class CustomSpringEventPublisher(
 * _**ApplicationEventPublisherAware**_ 인터페이스를 발행자 클래스가 구현하는 방식으로도 가능하다.
 * Spring Framework 4.2 부터 _**ApplicationEventPublisher**_ 인터페이스는 모든 객체를 이벤트로 허용하는 _**publishEvent(Object event)**_ 메서드에 대한 새로운 오버로드를 제공한다. 그러므로 더 이상 _**ApplicationEvent**_ 클래스를 확장할 필요가 없다.
 
-### 2.3. Listener
+### 2.3. 수신자
 
 수신자를 구현해보자. _**ApplicationListener**_ 인터페이스만 구현하면 된다.
 
@@ -69,7 +69,7 @@ class CustomSpringEventListener : ApplicationListener<CustomSpringEvent> {
 
 * 사용자 정의 이벤트가 제네릭 타입을 통해 매개변수화되어 _**onApplicationEvent()**_ 메서드를 type-safe 하게 구성
 
-## 3. Creating Asynchronous Events
+## 3. 비동기 이벤트 처리
 
 이벤트를 비동기로 처리해야 할 수도 있다.
 
@@ -88,7 +88,7 @@ class AsynchronousSpringEventsConfig {
 
 * 수신자는 별도의 스레드에서 이벤트를 비동기적으로 처리하도록 설정된다.
 
-## 4. Existing Framework Events
+## 4. 프레임워크에서 제공하는 이벤트
 
 Spring의 _**ApplicationContext**_**는 **_**ContextRefreshedEvent, ContextStartedEvent, RequestHandledEvent**_ 등 다양한 이벤트를 발생시킨다.
 
@@ -169,7 +169,7 @@ class GenericSpringEventListener : ApplicationListener<GenericSpringEvent<String
 * _**ApplicationListener**_의 제네릭 타입에는 _**ApplicationEvent**_이나 해당 클래스의 자식만 선언할 수 있으므로 컴파일 에러가 발생한다.
 * 따라서 _**GenericSpringEvent**_가 _**ApplicationEvent**_를 상속해야만 사용이 가능하다.
 
-상속하지 않고 _**@EventListener**_ 애노테이션에 boolean SpEL 표현식을 정의하여 이벤트 수신자를 조건부로 이벤트를 처리하도록 만드는 것도 가능하다.
+상속하지 않고 _**@EventListener**_ 에 boolean SpEL 표현식을 정의하여 이벤트 수신자를 조건부로 이벤트를 처리하도록 만드는 것도 가능하다.
 
 ```kotlin
 @Component
@@ -198,7 +198,7 @@ class GenericSpringEventPublisher(
 }
 ```
 
-만약 @EventListener 애노테이션을 명시한 메서드에서 null이 아닌 값을 반환할 경우 새로운 이벤트를 발행하게 된다.
+만약 @EventListener 을 명시한 메서드에서 null이 아닌 값을 반환할 경우 새로운 이벤트를 발행하게 된다.
 
 ```kotlin
 @Component
@@ -220,7 +220,7 @@ class AnnotationDrivenEventListener {
 
 ## 7. Transaction-Bound Events
 
-Spring 4.2부터 이벤트 수신자가 이벤트를 처리할 때 트랜잭션에 할당될 수 있도록 _**@EventListener**_의 확장인 _**@TransactionalEventListener**_ 애노테이션을 제공한다.
+Spring 4.2부터 이벤트 수신자가 이벤트를 처리할 때 트랜잭션에 할당될 수 있도록 _**@EventListener**_의 확장인 _**@TransactionalEventListener**_ 을 제공한다.
 
 다음은 할당이 가능한 트랜잭션 단계이다.
 
