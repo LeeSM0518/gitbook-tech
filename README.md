@@ -105,7 +105,7 @@ class ContextRefreshedListener : ApplicationListener<ContextRefreshedEvent> {
 
 * Spring 에서 발생하는 이벤트들을 알아보기 위해서는 다음 [링크](https://www.baeldung.com/spring-context-events)를 확인
 
-## 5. Annotation-Driven Event Listener
+## 5. Annotation 기반의 이벤트 수신자
 
 Spring 4.2부터 이벤트 수신자는 _**ApplicationListener**_ 인터페이스를 구현하는 빈일 필요가 없다.
 
@@ -134,11 +134,11 @@ class AnnotationDrivenEventListener {
 
       * 상세한건 다음 [링크](https://www.baeldung.com/spring-async#enable-async-support)를 확인
 
-## 6. Generics Support
+## 6. 제네릭 지원
 
 이벤트의 내용을 제네릭으로 선언하여 전달하는 것도 가능하다.
 
-### 6.1. Generic Application Event
+### 6.1. 제네릭 이벤트
 
 제네릭 이벤트 타입으로 만들어보자.
 
@@ -151,7 +151,7 @@ class GenericSpringEvent<T>(
 
 * _**CustomSpringEvent**_와 다르게 _**GenericSpringEvent**_는 임의의 이벤트를 발행하는 유연성이 있으며 _**ApplicationEvent**_에서 확장할 필요가 없다.
 
-### 6.2. Listener
+### 6.2. 수신자
 
 제네릭 이벤트에 대한 수신자를 만들어보자.
 
@@ -181,7 +181,7 @@ class AnnotationDrivenEventListener {
 }
 ```
 
-### 6.3. Publisher
+### 6.3. 발행자
 
 이벤트 발행자 클래스는 다음과 같이 만들면 된다.
 
@@ -218,7 +218,7 @@ class AnnotationDrivenEventListener {
 
 * 위와 같이 구현되어 있을 경우 CustomSpringEvent가 발행될 경우 handleCustomEvent가 호출되고, handleCustomEvent 메서드는 CustomSprintEvent2를 발행하여 handleCustomEvent2가 그 다음으로 호출된다.
 
-## 7. Transaction-Bound Events
+## 7. 트랜잭션 이벤트
 
 Spring 4.2부터 이벤트 수신자가 이벤트를 처리할 때 트랜잭션에 할당될 수 있도록 _**@EventListener**_의 확장인 _**@TransactionalEventListener**_ 을 제공한다.
 
@@ -242,12 +242,12 @@ fun handleCustom(event: CustomSpringEvent) {
 * 실행중인 트랜잭션이 없으면 _**fallbackExecution**_ 속성을 _**true**_로 설정해야 한다.
   * 이를 재정의 하지 않는 한 이벤트가 전혀 발행되지 않는다.
 
-## 8. Conclusion
+## 8. 예제 코드
 
 예제 코드는 다음 링크에서 확인 가능합니다.
 
 {% embed url="https://github.com/LeeSM0518/notification-service/tree/%231/feat/apply-tutorial-about-spring-events" %}
 
-## 9. Reference
+## 9. 참고
 
 {% embed url="https://www.baeldung.com/spring-events" %}
