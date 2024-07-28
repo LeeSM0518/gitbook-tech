@@ -220,8 +220,34 @@ class AnnotationDrivenEventListener {
 
 ## 7. Transaction-Bound Events
 
+Spring 4.2부터 이벤트 수신자가 이벤트를 처리할 때 트랜잭션에 할당될 수 있도록 _**@EventListener**_의 확장인 _**@TransactionalEventListener**_ 애노테이션을 제공한다.
 
+다음은 할당이 가능한 트랜잭션 단계이다.
 
-## Reference
+* _**AFTER\_COMMIT**_ : 트랜잭션이 성공적으로 완료된 경우 (default 값)
+* _**AFTER\_ROLLBACK**_ : 트랜잭션이 롤백된 경우
+* _**AFTER\_COMPLETION**_ : 트랜잭션이 완료된 경우 (AFTER\_COMMIT, AFTER\_ROLLBACK)
+* BEFORE\_COMMIT : 트랜잭션 커밋 직전
+
+트랜잭션 이벤트 수신자를 만들어보자.
+
+```kotlin
+@TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+fun handleCustom(event: CustomSpringEvent) {
+    println("Handling event inside a transaction BEFORE COMMIT")
+}
+```
+
+* 이 수신자는 이벤트 생성자가 커밋되려고 하는 트랜잭션이 있는 경우에만 호출된다.
+* 실행중인 트랜잭션이 없으면 _**fallbackExecution**_ 속성을 _**true**_로 설정해야 한다.
+  * 이를 재정의 하지 않는 한 이벤트가 전혀 발행되지 않는다.
+
+## 8. Conclusion
+
+예제 코드는 다음 링크에서 확인 가능합니다.
+
+{% embed url="https://github.com/LeeSM0518/notification-service/tree/%231/feat/apply-tutorial-about-spring-events" %}
+
+## 9. Reference
 
 {% embed url="https://www.baeldung.com/spring-events" %}
