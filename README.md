@@ -3,251 +3,159 @@ cover: .gitbook/assets/Frame 81.png
 coverY: 0
 ---
 
-# Spring Events
+# Spring AOP
 
 ## 1. 개요
 
-_**ApplicationContext**_를 활용하여 이벤트를 발행할 수 있다.
+AOP(Aspect Oriented Programming, 관심 지향 프로그래밍)는 관심사를 분리하여 모듈성을 높이는 것을 목표로 하는 프로그래밍 패러다임이다. 기존 코드를 수정하지 않고 코드에 작업을 추가하여 동작시킨다. Spring의 AOP 프레임워크를 사용하여 구현해보자.
 
-이벤트 발행을 활용할 경우 다음 항목들을 따라야 한다.
+## 2. AOP 개념 및 용어
 
-* Spring Framework 4.2 이전 버전을 사용하는 경우에는 이벤트 클래스에서 _**ApplicationEvent**_ 클래스를 상속받아야 한다. (4.2 버전부터는 상속받을 필요 없음)
-* 발행자 클래스에 _**ApplicationEventPublisher**_ 객체를 주입해야 한다.
-* 수신자 클래스는 _**ApplicationListener**_ 인터페이스를 구현해야 한다.
+AOP와 관련된 개념과 용어를 살펴보자.
 
-## 2. 사용자 정의 이벤트
+<figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
-Spring을 사용하여 동기적으로 사용자 정의 이벤트를 생성하고 발행할 수 있다.
+### 2.1. Business Object
 
-이로 인해 구독자의 로직이 발행자의 트랜잭션에 속하여 동작할 수 있는 등의 여러 장점이 있다.
+Business Object는 일반적인 비즈니스 로직이 수행되는 일반 클래스이다.
 
-### 2.1. 이벤트
+### 2.2. Aspect
 
-간단한 이벤트 클래스를 구현해보자.
+Aspect는 여러 클래스에 적용되는 관심사의 모듈화이다.
+
+통합 로깅은 이러한 cross-cutting concern(교차적 관심)의 예시이다.
 
 ```kotlin
-class CustomSpringEvent(
-    source: Any,
-    val message: String,
-) : ApplicationEvent(source)
+class AdderAfterReturnAspect {
+  private val logger = LoggerFactory.getLogger(this::class.java)
+
+  fun afterReturn(returnValue: Any) {
+    logger.info("value return was {}", returnValue)
+  }
+}
 ```
 
-### 2.2. 발행자
+### 2.3. _Joinpoint_
 
-이벤트 발행자 클래스를 구현해보자.
+_Joinpoint_는 메소드 실행이나 예외 처리 등 실행 지점이다.
 
-_**ApplicationEventPublisher**_ 를 주입하고 _**publishEvent()**_ 를 호출하여 이벤트를 발행할 수 있다.
+Spring AOP에서 _JoinPoint_는 메소드 실행을 의미한다.
+
+### 2.4. _Pointcut_
+
+_Pointcut_은 특정 _JoinPoint_에서 _Aspect_에 의해 적용되는 _Advice_를 일치시키는 데 도움이 되는 조건자이다. Spring AOP는 보통 _Advice_를 _Pointcut_ 표현식과 연관시키고 _Pointcut_과 일치하는 모든 _Joinpoint_에서 실행된다.
+
+### 2.5. _Advice_
+
+_Advice_는 특정 _Joinpoint_에서 Aspect가 취하는 조치이다.
+
+_Advice_에는 “_around_”와 “_before_”, “_after_” 유형이 존재한다.
+
+## 3. AOP 실습
+
+### 3.1. 의존성 추가
+
+Spring AOP 관련 의존을 추가한다.
+
+```groovy
+// aop
+implementation("org.springframework.boot:spring-boot-starter-aop")
+```
+
+### 3.2. 사용자 정의 어노테이션 만들기
+
+메소드의 실행 시간을 측정하는 어노테이션을 만들어보자.
+
+```kotlin
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class LogExecutionTime
+```
+
+* _**@Target**_ : 어노테이션이 적용될 위치를 정의
+* _**@Retention**_ : 어느 시점까지 어노테이션을 유지시킬지 정의
+
+### 3.4. Aspect 만들기
+
+메소드 실행 시간을 측정할 Aspect를 만들어보자.
+
+```kotlin
+@Aspect
+@Component
+class ExampleAspect {
+
+}
+```
+
+* _@Aspect_ 어노테이션을 사용하여 Aspect를 정의함
+* Spring에서 클래스를 감지하려면 bean으로 등록되어야 하므로 _@Component_ 어노테이션 사용함
+
+### 3.5. Pointcut과 Advice 만들기
+
+Aspect에 Pointcut과 Advice를 만들어보자.
+
+```kotlin
+@Around("@annotation(LogExecutionTime)")
+fun logExecutionTime(joinPoint: ProceedingJoinPoint): Any? {
+    return joinPoint.proceed()
+}
+```
+
+* _@Around_ 어노테이션을 달아서 메소드 실행 전과 후에 코드 추가를 정의
+* _@Around_의 포인트컷 인수에는 _@LogExecutionTime_ 어노테이션이 달린 메서드에 적용하라는 조건을 정의
+* logExecutionTime() 메소드가 Advice를 의미
+* @LogExecutionTime 어노테이션이 달린 메소드가 호출되면, Advice인 logExecutionTime() 메소드가 호출되며 종료된 이후에도 해당 메소드가 호출된다.
+
+### 3.6. 실행 시간 로깅
+
+Advice에 메소드의 실행 시간을 로깅하는 동작을 추가해보자.
+
+```kotlin
+@Aspect
+@Component
+class ExampleAspect {
+
+    @Around("@annotation(LogExecutionTime)")
+    fun logExecutionTime(joinPoint: ProceedingJoinPoint): Any? {
+        val start = System.currentTimeMillis()
+        val proceed = joinPoint.proceed()
+        val executionTime = System.currentTimeMillis() - start
+        println("${joinPoint.signature} executed in $executionTime ms")
+        return proceed
+    }
+}
+```
+
+* joinpoint 인스턴스를 사용하기 위해 파라미터로 joinpoint를 정의
+* 메서드의 파라미터와 다른 정보에도 접근할 수 있다
+
+다른 클래스에서 메서드를 구현하고 @LogExecutionTime을 달아서 결과를 확인해보자.
 
 ```kotlin
 @Component
-class CustomSpringEventPublisher(
-    val applicationEventPublisher: ApplicationEventPublisher,
-) {
-    fun publishCustomEvent(message: String) {
-        println("Publishing custom event.")
-        val customSpringEvent = CustomSpringEvent(this, message)
-        applicationEventPublisher.publishEvent(customSpringEvent)
+class BusinessObject {
+
+    @LogExecutionTime
+    fun serve() = runBlocking {
+        sleep(1000)
     }
 }
 ```
 
-* _**ApplicationEventPublisherAware**_ 인터페이스를 발행자 클래스가 구현하는 방식으로도 가능하다.
-* Spring Framework 4.2 부터 _**ApplicationEventPublisher**_ 인터페이스는 모든 객체를 이벤트로 허용하는 _**publishEvent(Object event)**_ 메서드에 대한 새로운 오버로드를 제공한다. 그러므로 더 이상 _**ApplicationEvent**_ 클래스를 확장할 필요가 없다.
+실행할 경우 다음과 같은 결과를 볼 수 있다.
 
-### 2.3. 수신자
-
-수신자를 구현해보자. _**ApplicationListener**_ 인터페이스만 구현하면 된다.
-
-```kotlin
-@Component
-class CustomSpringEventListener : ApplicationListener<CustomSpringEvent> {
-    override fun onApplicationEvent(event: CustomSpringEvent) {
-        println("Received spring custom event - ${event.message}")
-    }
-}
+```
+void io.tutorial.notificationservice.aop.BusinessObject.serve() executed in 1006 ms
 ```
 
-* 사용자 정의 이벤트가 제네릭 타입을 통해 매개변수화되어 _**onApplicationEvent()**_ 메서드를 type-safe 하게 구성
+## 4. 예제 코드
 
-## 3. 비동기 이벤트 처리
+예제 코드는 다음 링크에서 확인할 수 있다.
 
-이벤트를 비동기로 처리해야 할 수도 있다.
+{% embed url="https://github.com/LeeSM0518/notification-service/tree/%232/feat/apply-tutorial-about-spring-aop" %}
 
-_**ApplicationEventMulticaster**_ 빈 설정을 통해 비동기로 구성시킬 수 있다.
+## 5. 참고
 
-```kotlin
-@Configuration
-class AsynchronousSpringEventsConfig {
+{% embed url="https://www.baeldung.com/spring-aop" %}
 
-    @Bean(name = ["applicationEventMulticaster"])
-    fun simpleApplicationEventMulticaster(): ApplicationEventMulticaster =
-        SimpleApplicationEventMulticaster()
-            .apply { setTaskExecutor(SimpleAsyncTaskExecutor()) }
-}
-```
-
-* 수신자는 별도의 스레드에서 이벤트를 비동기적으로 처리하도록 설정된다.
-
-## 4. 프레임워크에서 제공하는 이벤트
-
-Spring의 _**ApplicationContext**_**는 **_**ContextRefreshedEvent, ContextStartedEvent, RequestHandledEvent**_ 등 다양한 이벤트를 발생시킨다.
-
-이러한 이벤트는 개발자가 애플리케이션의 수명 주기와 컨텍스트를 연결하고 필요한 경우 직접 구현한 로직을 추가할 수 있도록 옵션을 제공한다.
-
-```kotlin
-@Component
-class ContextRefreshedListener : ApplicationListener<ContextRefreshedEvent> {
-    override fun onApplicationEvent(event: ContextRefreshedEvent) {
-        println("Handling context refreshed event.")
-    }
-}
-```
-
-* Spring 에서 발생하는 이벤트들을 알아보기 위해서는 다음 [링크](https://www.baeldung.com/spring-context-events)를 확인
-
-## 5. Annotation 기반의 이벤트 수신자
-
-Spring 4.2부터 이벤트 수신자는 _**ApplicationListener**_ 인터페이스를 구현하는 빈일 필요가 없다.
-
-_**@EventListener**_ 주석을 통해 관리되는 빈의 모든 _public_ 메소드에 등록할 수 있다.
-
-```kotlin
-@Component
-class AnnotationDrivenEventListener {
-    @EventListener
-    fun handleContextStart(event: ContextStartedEvent) {
-        println("Handling context started event.")
-    }
-}
-```
-
-* 메서드 시그니처는 사용하는 이벤트를 선언한다.
-* 기본적으로 리스너는 동기적으로 호출된다.
-* _**@Async**_ 주석을 추가하면 쉽게 비동기식으로 만들 수 있다.
-  *   비동기로 동작시기키 위해서는 다음과 같은 설정이 필요하다.
-
-      ```kotlin
-      @Configuration
-      @EnableAsync
-      public class SpringAsyncConfig { ... }
-      ```
-
-      * 상세한건 다음 [링크](https://www.baeldung.com/spring-async#enable-async-support)를 확인
-
-## 6. 제네릭 지원
-
-이벤트의 내용을 제네릭으로 선언하여 전달하는 것도 가능하다.
-
-### 6.1. 제네릭 이벤트
-
-제네릭 이벤트 타입으로 만들어보자.
-
-```kotlin
-class GenericSpringEvent<T>(
-    val what: T,
-    val success: Boolean
-)
-```
-
-* _**CustomSpringEvent**_와 다르게 _**GenericSpringEvent**_는 임의의 이벤트를 발행하는 유연성이 있으며 _**ApplicationEvent**_에서 확장할 필요가 없다.
-
-### 6.2. 수신자
-
-제네릭 이벤트에 대한 수신자를 만들어보자.
-
-먼저 _**ApplicationListener**_ 인터페이스를 구현하는 수신자를 만들어 보자.
-
-```kotlin
-@Component
-class GenericSpringEventListener : ApplicationListener<GenericSpringEvent<String>> {
-    override fun onApplicationEvent(event: GenericSpringEvent<String>) {
-        TODO("Not yet implemented")
-    }
-}
-```
-
-* _**ApplicationListener**_의 제네릭 타입에는 _**ApplicationEvent**_이나 해당 클래스의 자식만 선언할 수 있으므로 컴파일 에러가 발생한다.
-* 따라서 _**GenericSpringEvent**_가 _**ApplicationEvent**_를 상속해야만 사용이 가능하다.
-
-상속하지 않고 _**@EventListener**_ 에 boolean SpEL 표현식을 정의하여 이벤트 수신자를 조건부로 이벤트를 처리하도록 만드는 것도 가능하다.
-
-```kotlin
-@Component
-class AnnotationDrivenEventListener {
-    @EventListener(condition = "#event.success")
-    fun handleSuccessful(event: GenericSpringEvent<String>) {
-        println("Handling generic event (conditional).")
-    }
-}
-```
-
-### 6.3. 발행자
-
-이벤트 발행자 클래스는 다음과 같이 만들면 된다.
-
-```kotlin
-@Component
-class GenericSpringEventPublisher(
-    val applicationEventPublisher: ApplicationEventPublisher,
-) {
-    fun publishEvent(message: String) {
-        println("Publishing generic event. ")
-        val genericEvent = GenericSpringEvent(message, true)
-        applicationEventPublisher.publishEvent(genericEvent)
-    }
-}
-```
-
-만약 @EventListener 을 명시한 메서드에서 null이 아닌 값을 반환할 경우 새로운 이벤트를 발행하게 된다.
-
-```kotlin
-@Component
-class AnnotationDrivenEventListener {
-    @EventListener
-    fun handleCustomEvent(event: CustomSpringEvent): CustomSpringEvent2 {
-        println("Handling custom event.")
-        return CustomSpringEvent2("message")
-    }
-
-    @EventListener
-    fun handleCustomEvent2(event: CustomSpringEvent2) {
-        println("Handling custom event2.")
-    }
-}
-```
-
-* 위와 같이 구현되어 있을 경우 CustomSpringEvent가 발행될 경우 handleCustomEvent가 호출되고, handleCustomEvent 메서드는 CustomSprintEvent2를 발행하여 handleCustomEvent2가 그 다음으로 호출된다.
-
-## 7. 트랜잭션 이벤트
-
-Spring 4.2부터 이벤트 수신자가 이벤트를 처리할 때 트랜잭션에 할당될 수 있도록 _**@EventListener**_의 확장인 _**@TransactionalEventListener**_ 을 제공한다.
-
-다음은 할당이 가능한 트랜잭션 단계이다.
-
-* _**AFTER\_COMMIT**_ : 트랜잭션이 성공적으로 완료된 경우 (default 값)
-* _**AFTER\_ROLLBACK**_ : 트랜잭션이 롤백된 경우
-* _**AFTER\_COMPLETION**_ : 트랜잭션이 완료된 경우 (AFTER\_COMMIT, AFTER\_ROLLBACK)
-* _**BEFORE\_COMMIT**_ : 트랜잭션 커밋 직전
-
-트랜잭션 이벤트 수신자를 만들어보자.
-
-```kotlin
-@TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
-fun handleCustom(event: CustomSpringEvent) {
-    println("Handling event inside a transaction BEFORE COMMIT")
-}
-```
-
-* 이 수신자는 이벤트 생성자가 커밋되려고 하는 트랜잭션이 있는 경우에만 호출된다.
-* 실행중인 트랜잭션이 없으면 _**fallbackExecution**_ 속성을 _**true**_로 설정해야 한다.
-  * 이를 재정의 하지 않는 한 이벤트가 전혀 발행되지 않는다.
-
-## 8. 예제 코드
-
-예제 코드는 다음 링크에서 확인 가능합니다.
-
-{% embed url="https://github.com/LeeSM0518/notification-service/tree/%231/feat/apply-tutorial-about-spring-events" %}
-
-## 9. 참고
-
-{% embed url="https://www.baeldung.com/spring-events" %}
+{% embed url="https://www.baeldung.com/spring-aop-annotation" %}
