@@ -3,170 +3,159 @@ cover: .gitbook/assets/Frame 81.png
 coverY: 0
 ---
 
-# @Transactional
+# Spring AOP
 
 ## 1. 개요
 
-Spring 트랜잭션을 올바르게 구성하는 방법과 _@Transactional_ 을 잘 사용하는 방법 및 잘못된 사용 방법에 대해 알아보자.
+AOP(Aspect Oriented Programming, 관심 지향 프로그래밍)는 관심사를 분리하여 모듈성을 높이는 것을 목표로 하는 프로그래밍 패러다임이다. 기존 코드를 수정하지 않고 코드에 작업을 추가하여 동작시킨다. Spring의 AOP 프레임워크를 사용하여 구현해보자.
 
-## 2. 트랜잭션 설정
+## 2. AOP 개념 및 용어
 
-_@Configuration_ 클래스에 _**@EnableTransactionManagement**_ 를 사용하여 트랜잭션을 활성화 할 수 있다.
+AOP와 관련된 개념과 용어를 살펴보자.
+
+<figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+### 2.1. Business Object
+
+Business Object는 일반적인 비즈니스 로직이 수행되는 일반 클래스이다.
+
+### 2.2. Aspect
+
+Aspect는 여러 클래스에 적용되는 관심사의 모듈화이다.
+
+통합 로깅은 이러한 cross-cutting concern(교차적 관심)의 예시이다.
 
 ```kotlin
-@Configuration
-@EnableTransactionManagement
-class PersistenceJPAConfig {
-    
-    @Bean
-    fun entityManagerFactory(): LocalContainerEntityManagerFactoryBean {
-        // ...
-    }
-    
-    @Bean
-    fun transactionManager(): PlatformTransactionManager {
-        val transactionManager = JpaTransactionManager()
-        transactionManager.setEntityManager(entityManagerFactory().getObject())
-        return transactionManager
+class AdderAfterReturnAspect {
+  private val logger = LoggerFactory.getLogger(this::class.java)
+
+  fun afterReturn(returnValue: Any) {
+    logger.info("value return was {}", returnValue)
+  }
+}
+```
+
+### 2.3. _Joinpoint_
+
+_Joinpoint_는 메소드 실행이나 예외 처리 등 실행 지점이다.
+
+Spring AOP에서 _JoinPoint_는 메소드 실행을 의미한다.
+
+### 2.4. _Pointcut_
+
+_Pointcut_은 특정 _JoinPoint_에서 _Aspect_에 의해 적용되는 _Advice_를 일치시키는 데 도움이 되는 조건자이다. Spring AOP는 보통 _Advice_를 _Pointcut_ 표현식과 연관시키고 _Pointcut_과 일치하는 모든 _Joinpoint_에서 실행된다.
+
+### 2.5. _Advice_
+
+_Advice_는 특정 _Joinpoint_에서 Aspect가 취하는 조치이다.
+
+_Advice_에는 “_around_”와 “_before_”, “_after_” 유형이 존재한다.
+
+## 3. AOP 실습
+
+### 3.1. 의존성 추가
+
+Spring AOP 관련 의존을 추가한다.
+
+```groovy
+// aop
+implementation("org.springframework.boot:spring-boot-starter-aop")
+```
+
+### 3.2. 사용자 정의 어노테이션 만들기
+
+메소드의 실행 시간을 측정하는 어노테이션을 만들어보자.
+
+```kotlin
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class LogExecutionTime
+```
+
+* _**@Target**_ : 어노테이션이 적용될 위치를 정의
+* _**@Retention**_ : 어느 시점까지 어노테이션을 유지시킬지 정의
+
+### 3.4. Aspect 만들기
+
+메소드 실행 시간을 측정할 Aspect를 만들어보자.
+
+```kotlin
+@Aspect
+@Component
+class ExampleAspect {
+
+}
+```
+
+* _@Aspect_ 어노테이션을 사용하여 Aspect를 정의함
+* Spring에서 클래스를 감지하려면 bean으로 등록되어야 하므로 _@Component_ 어노테이션 사용함
+
+### 3.5. Pointcut과 Advice 만들기
+
+Aspect에 Pointcut과 Advice를 만들어보자.
+
+```kotlin
+@Around("@annotation(LogExecutionTime)")
+fun logExecutionTime(joinPoint: ProceedingJoinPoint): Any? {
+    return joinPoint.proceed()
+}
+```
+
+* _@Around_ 어노테이션을 달아서 메소드 실행 전과 후에 코드 추가를 정의
+* _@Around_의 포인트컷 인수에는 _@LogExecutionTime_ 어노테이션이 달린 메서드에 적용하라는 조건을 정의
+* logExecutionTime() 메소드가 Advice를 의미
+* @LogExecutionTime 어노테이션이 달린 메소드가 호출되면, Advice인 logExecutionTime() 메소드가 호출되며 종료된 이후에도 해당 메소드가 호출된다.
+
+### 3.6. 실행 시간 로깅
+
+Advice에 메소드의 실행 시간을 로깅하는 동작을 추가해보자.
+
+```kotlin
+@Aspect
+@Component
+class ExampleAspect {
+
+    @Around("@annotation(LogExecutionTime)")
+    fun logExecutionTime(joinPoint: ProceedingJoinPoint): Any? {
+        val start = System.currentTimeMillis()
+        val proceed = joinPoint.proceed()
+        val executionTime = System.currentTimeMillis() - start
+        println("${joinPoint.signature} executed in $executionTime ms")
+        return proceed
     }
 }
 ```
 
-* spring-data-\* 또는 spring-tx 의존이 있는 경우에는 기본적으로 트랜잭션이 활성화된다.
+* joinpoint 인스턴스를 사용하기 위해 파라미터로 joinpoint를 정의
+* 메서드의 파라미터와 다른 정보에도 접근할 수 있다
 
-## 3. _@Transactional_ 어노테이션
-
-클래스나 메서드에 _@Transactional_ 어노테이션을 정의할 수 있다.
-
-```kotlin
-@Service
-@Transactional
-class FooService {
-	// ...
-}
-```
-
-* 다음과 같은 설정도 지원한다.
-  *   _Propagation Type :_ 전파 유형
-
-      ```kotlin
-      @Transactional(propagation = Propagation.REQUIRED)
-      ```
-
-      * _REQUIRED_ : 기본 값. 현재 트랜잭션이 존재하면 그 트랜잭션에 참여, 존재하지 않으면 새로운 트랜잭션을 시작
-      * _REQUIRES\_NEW_ : 항상 새로운 트랜잭션을 시작. 현재 트랜잭션이 존재하면 일시 중단.
-      * _SUPPORTS_ : 현재 트랜잭션이 존재하면 그 트랜잭션에 참여, 존재하지 않으면 트랜잭션 없이 실행
-      * _NOT\_SUPPORTS_ : 트랜잭션이 존재하면 일시 중단하고 트랜잭션 없이 실행
-      * _MANDATORY_ : 반드시 트랜잭션 내에서 실행되어야 함. 트랜잭션이 없으면 예외
-      * _NEVER_ : 트랜잭션이 없어야 실행. 트랜잭션이 존재하면 예외
-      * _NESTED_ : 현재 트랜잭션이 존재하면 중첩된 트랜잭션을 시작, 존재하지 않으면 새로운 트랜잭션을 시작.
-  *   _Isolation Level :_ 격리 수준
-
-      ```kotlin
-      @Transactional(propagation = Propagation.REQUIRED)
-      ```
-
-      * _DEFAULT_ : 데이터베이스의 격리 수준을 따름
-      * _READ\_UNCOMMITTED_ : 다른 트랜잭션에서 커밋되지 않은 변경 내용도 읽음
-      * _READ\_COMMITTED_ : 다른 트랜잭션에서 커밋된 데이터만 읽음
-      * _REPEATABLE\_READ_ : 트랜잭션 동안 읽은 데이터가 변경되지 않도록 보장
-      * _SERIALIZABLE_ : 가능 높은 격리 수준으로, 완벽한 읽기 일관성 보장
-  *   _Timeout_ : 시간 초과
-
-      ```kotlin
-      @Transactional(timeout = 5) // 5초
-      ```
-  *   _readOnly_ : 읽기 전용
-
-      ```kotlin
-      @Transactional(readOnly = true)
-      ```
-  *   _Rollback_ : 롤백 규칙
-
-      ```kotlin
-      // 롤백할 예외를 지정할 때 사용
-      @Transactional(rollbackFor = Exception.class)
-
-      // 롤백하지 않을 예외를 지정할 때 사용
-      @Transactional(noRollbackFor = IllegalArgumentException.class)
-      ```
-
-      * 특정 예외가 발생할 때 트랜잭션을 롤백하도록 설정
-
-## 4. 잘못된 사용
-
-### 4.1. 트랜잭션과 프록시
-
-Spring은 _@Transactional_ 이 붙은 모든 클래스에 대한 프록시를 생성한다. Spring은 프록시를 활용해 트랜잭션을 시작하고 커밋하기 위해 메서드 실행 전후에 트랜잭션 로직을 실행한다.
-
-위와 같은 특성으로 인해 @Transactional 을 사용할 때 두 가지의 주의할 점이 있다.
-
-첫 번째는 클래스 내에서 자기 자신의 메서드를 호출하는 경우에는 _@Transactional_ 이 정상 동작하지 않는 것이다. _@Transactional_ 이 붙은 빈은 트랜잭션 관리를 위해 Spring이 자동으로 생성하는 프록시 객체를 통해 호출되는데 내부 호출은 프록시를 거치지 않기 때문에 트랜잭션이 동작하지 않는 것이다.
-
-즉, 다음과 같이 호출할 경우 @Transactional 이 동작하지 않게 된다.
+다른 클래스에서 메서드를 구현하고 @LogExecutionTime을 달아서 결과를 확인해보자.
 
 ```kotlin
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+@Component
+class BusinessObject {
 
-@Service
-public class TransactionalService {
-
-    @Transactional
-    public void methodA() {
-        // Do something that requires a transaction
-        System.out.println("methodA - Transaction started");
-        methodB(); // Self-invocation
-    }
-
-    @Transactional
-    public void methodB() {
-        // Do something else that requires a transaction
-        System.out.println("methodB - Transaction started");
+    @LogExecutionTime
+    fun serve() = runBlocking {
+        sleep(1000)
     }
 }
 ```
 
-두 번째로 주의할 점은 _public_ 메서드에만 _@Transactional_ 을 붙어야 한다는 것이다. 다른 가시성에 대해서는 프록시가 동작하지 않으므로 _@Transactional_ 이 무시된다.
+실행할 경우 다음과 같은 결과를 볼 수 있다.
 
-### 4.2. Isolation Level 변경
-
-다음과 같이 트랜잭션의 isolation level을 변경할 수 있다.
-
-```kotlin
-@Transactional(isolation = Isolation.SERIALIZABLE)
+```
+void io.tutorial.notificationservice.aop.BusinessObject.serve() executed in 1006 ms
 ```
 
-* 이는 Spring 4.1에서 도입되어 이전 버전에서는 예외가 발생한다.
+## 4. 예제 코드
 
-### 4.3. Read-Only 트랜잭션
+예제 코드는 다음 링크에서 확인할 수 있다.
 
-다음과 같이 트랜잭션에 Read-Only를 설정할 수 있다.
+{% embed url="https://github.com/LeeSM0518/notification-service/tree/%232/feat/apply-tutorial-about-spring-aop" %}
 
-```kotlin
-@Transactional(readOnly = true)
-```
+## 5. 참고
 
-* 주의할 점은 _readOnly_가 true로 설정되어 있어도 삽입이나 업데이터가 발생하지 않을 것이라고 확신할 수 없다는 것이다. 이는 구현체에 따라 다르다.
+{% embed url="https://www.baeldung.com/spring-aop" %}
 
-_readOnly_ 는 트랜잭션 내부에서만 동작하므로 트랜잭션 컨텍스트 외부에서 작업이 발생하면 _readOnly_가 무시된다.
-
-```kotlin
-@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-```
-
-* 이처럼 트랜잭션 컨텍스트가 아닐 경우에는 readOnly가 무시될 수 있다.
-
-### 4.4. 트랜잭션 로깅
-
-트랜잭션 관련 문제를 디버깅 할 때 유용한 방법은 트랜잭션 패키지에 대한 로깅을 수정하는 것이다.
-
-패키지는 _“org.springframework.transaction”_ 이며, _TRACE_ 로 로깅 레벨을 설정하면 된다.
-
-## 5. 동작 원리
-
-{% embed url="https://www.marcobehler.com/guides/spring-transaction-management-transactional-in-depth" %}
-
-## 6. 참고
-
-{% embed url="https://www.baeldung.com/transaction-configuration-with-jpa-and-spring" %}
+{% embed url="https://www.baeldung.com/spring-aop-annotation" %}

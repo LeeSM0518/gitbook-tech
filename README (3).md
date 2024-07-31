@@ -3,251 +3,170 @@ cover: .gitbook/assets/Frame 81.png
 coverY: 0
 ---
 
-# Spring Events
+# @Transactional
 
 ## 1. 개요
 
-_**ApplicationContext**_를 활용하여 이벤트를 발행할 수 있다.
+Spring 트랜잭션을 올바르게 구성하는 방법과 _@Transactional_ 을 잘 사용하는 방법 및 잘못된 사용 방법에 대해 알아보자.
 
-이벤트 발행을 활용할 경우 다음 항목들을 따라야 한다.
+## 2. 트랜잭션 설정
 
-* Spring Framework 4.2 이전 버전을 사용하는 경우에는 이벤트 클래스에서 _**ApplicationEvent**_ 클래스를 상속받아야 한다. (4.2 버전부터는 상속받을 필요 없음)
-* 발행자 클래스에 _**ApplicationEventPublisher**_ 객체를 주입해야 한다.
-* 수신자 클래스는 _**ApplicationListener**_ 인터페이스를 구현해야 한다.
-
-## 2. 사용자 정의 이벤트
-
-Spring을 사용하여 동기적으로 사용자 정의 이벤트를 생성하고 발행할 수 있다.
-
-이로 인해 구독자의 로직이 발행자의 트랜잭션에 속하여 동작할 수 있는 등의 여러 장점이 있다.
-
-### 2.1. 이벤트
-
-간단한 이벤트 클래스를 구현해보자.
-
-```kotlin
-class CustomSpringEvent(
-    source: Any,
-    val message: String,
-) : ApplicationEvent(source)
-```
-
-### 2.2. 발행자
-
-이벤트 발행자 클래스를 구현해보자.
-
-_**ApplicationEventPublisher**_ 를 주입하고 _**publishEvent()**_ 를 호출하여 이벤트를 발행할 수 있다.
-
-```kotlin
-@Component
-class CustomSpringEventPublisher(
-    val applicationEventPublisher: ApplicationEventPublisher,
-) {
-    fun publishCustomEvent(message: String) {
-        println("Publishing custom event.")
-        val customSpringEvent = CustomSpringEvent(this, message)
-        applicationEventPublisher.publishEvent(customSpringEvent)
-    }
-}
-```
-
-* _**ApplicationEventPublisherAware**_ 인터페이스를 발행자 클래스가 구현하는 방식으로도 가능하다.
-* Spring Framework 4.2 부터 _**ApplicationEventPublisher**_ 인터페이스는 모든 객체를 이벤트로 허용하는 _**publishEvent(Object event)**_ 메서드에 대한 새로운 오버로드를 제공한다. 그러므로 더 이상 _**ApplicationEvent**_ 클래스를 확장할 필요가 없다.
-
-### 2.3. 수신자
-
-수신자를 구현해보자. _**ApplicationListener**_ 인터페이스만 구현하면 된다.
-
-```kotlin
-@Component
-class CustomSpringEventListener : ApplicationListener<CustomSpringEvent> {
-    override fun onApplicationEvent(event: CustomSpringEvent) {
-        println("Received spring custom event - ${event.message}")
-    }
-}
-```
-
-* 사용자 정의 이벤트가 제네릭 타입을 통해 매개변수화되어 _**onApplicationEvent()**_ 메서드를 type-safe 하게 구성
-
-## 3. 비동기 이벤트 처리
-
-이벤트를 비동기로 처리해야 할 수도 있다.
-
-_**ApplicationEventMulticaster**_ 빈 설정을 통해 비동기로 구성시킬 수 있다.
+_@Configuration_ 클래스에 _**@EnableTransactionManagement**_ 를 사용하여 트랜잭션을 활성화 할 수 있다.
 
 ```kotlin
 @Configuration
-class AsynchronousSpringEventsConfig {
-
-    @Bean(name = ["applicationEventMulticaster"])
-    fun simpleApplicationEventMulticaster(): ApplicationEventMulticaster =
-        SimpleApplicationEventMulticaster()
-            .apply { setTaskExecutor(SimpleAsyncTaskExecutor()) }
-}
-```
-
-* 수신자는 별도의 스레드에서 이벤트를 비동기적으로 처리하도록 설정된다.
-
-## 4. 프레임워크에서 제공하는 이벤트
-
-Spring의 _**ApplicationContext**_**는 **_**ContextRefreshedEvent, ContextStartedEvent, RequestHandledEvent**_ 등 다양한 이벤트를 발생시킨다.
-
-이러한 이벤트는 개발자가 애플리케이션의 수명 주기와 컨텍스트를 연결하고 필요한 경우 직접 구현한 로직을 추가할 수 있도록 옵션을 제공한다.
-
-```kotlin
-@Component
-class ContextRefreshedListener : ApplicationListener<ContextRefreshedEvent> {
-    override fun onApplicationEvent(event: ContextRefreshedEvent) {
-        println("Handling context refreshed event.")
+@EnableTransactionManagement
+class PersistenceJPAConfig {
+    
+    @Bean
+    fun entityManagerFactory(): LocalContainerEntityManagerFactoryBean {
+        // ...
+    }
+    
+    @Bean
+    fun transactionManager(): PlatformTransactionManager {
+        val transactionManager = JpaTransactionManager()
+        transactionManager.setEntityManager(entityManagerFactory().getObject())
+        return transactionManager
     }
 }
 ```
 
-* Spring 에서 발생하는 이벤트들을 알아보기 위해서는 다음 [링크](https://www.baeldung.com/spring-context-events)를 확인
+* spring-data-\* 또는 spring-tx 의존이 있는 경우에는 기본적으로 트랜잭션이 활성화된다.
 
-## 5. Annotation 기반의 이벤트 수신자
+## 3. _@Transactional_ 어노테이션
 
-Spring 4.2부터 이벤트 수신자는 _**ApplicationListener**_ 인터페이스를 구현하는 빈일 필요가 없다.
-
-_**@EventListener**_ 주석을 통해 관리되는 빈의 모든 _public_ 메소드에 등록할 수 있다.
+클래스나 메서드에 _@Transactional_ 어노테이션을 정의할 수 있다.
 
 ```kotlin
-@Component
-class AnnotationDrivenEventListener {
-    @EventListener
-    fun handleContextStart(event: ContextStartedEvent) {
-        println("Handling context started event.")
-    }
+@Service
+@Transactional
+class FooService {
+	// ...
 }
 ```
 
-* 메서드 시그니처는 사용하는 이벤트를 선언한다.
-* 기본적으로 리스너는 동기적으로 호출된다.
-* _**@Async**_ 주석을 추가하면 쉽게 비동기식으로 만들 수 있다.
-  *   비동기로 동작시기키 위해서는 다음과 같은 설정이 필요하다.
+* 다음과 같은 설정도 지원한다.
+  *   _Propagation Type :_ 전파 유형
 
       ```kotlin
-      @Configuration
-      @EnableAsync
-      public class SpringAsyncConfig { ... }
+      @Transactional(propagation = Propagation.REQUIRED)
       ```
 
-      * 상세한건 다음 [링크](https://www.baeldung.com/spring-async#enable-async-support)를 확인
+      * _REQUIRED_ : 기본 값. 현재 트랜잭션이 존재하면 그 트랜잭션에 참여, 존재하지 않으면 새로운 트랜잭션을 시작
+      * _REQUIRES\_NEW_ : 항상 새로운 트랜잭션을 시작. 현재 트랜잭션이 존재하면 일시 중단.
+      * _SUPPORTS_ : 현재 트랜잭션이 존재하면 그 트랜잭션에 참여, 존재하지 않으면 트랜잭션 없이 실행
+      * _NOT\_SUPPORTS_ : 트랜잭션이 존재하면 일시 중단하고 트랜잭션 없이 실행
+      * _MANDATORY_ : 반드시 트랜잭션 내에서 실행되어야 함. 트랜잭션이 없으면 예외
+      * _NEVER_ : 트랜잭션이 없어야 실행. 트랜잭션이 존재하면 예외
+      * _NESTED_ : 현재 트랜잭션이 존재하면 중첩된 트랜잭션을 시작, 존재하지 않으면 새로운 트랜잭션을 시작.
+  *   _Isolation Level :_ 격리 수준
 
-## 6. 제네릭 지원
+      ```kotlin
+      @Transactional(propagation = Propagation.REQUIRED)
+      ```
 
-이벤트의 내용을 제네릭으로 선언하여 전달하는 것도 가능하다.
+      * _DEFAULT_ : 데이터베이스의 격리 수준을 따름
+      * _READ\_UNCOMMITTED_ : 다른 트랜잭션에서 커밋되지 않은 변경 내용도 읽음
+      * _READ\_COMMITTED_ : 다른 트랜잭션에서 커밋된 데이터만 읽음
+      * _REPEATABLE\_READ_ : 트랜잭션 동안 읽은 데이터가 변경되지 않도록 보장
+      * _SERIALIZABLE_ : 가능 높은 격리 수준으로, 완벽한 읽기 일관성 보장
+  *   _Timeout_ : 시간 초과
 
-### 6.1. 제네릭 이벤트
+      ```kotlin
+      @Transactional(timeout = 5) // 5초
+      ```
+  *   _readOnly_ : 읽기 전용
 
-제네릭 이벤트 타입으로 만들어보자.
+      ```kotlin
+      @Transactional(readOnly = true)
+      ```
+  *   _Rollback_ : 롤백 규칙
+
+      ```kotlin
+      // 롤백할 예외를 지정할 때 사용
+      @Transactional(rollbackFor = Exception.class)
+
+      // 롤백하지 않을 예외를 지정할 때 사용
+      @Transactional(noRollbackFor = IllegalArgumentException.class)
+      ```
+
+      * 특정 예외가 발생할 때 트랜잭션을 롤백하도록 설정
+
+## 4. 잘못된 사용
+
+### 4.1. 트랜잭션과 프록시
+
+Spring은 _@Transactional_ 이 붙은 모든 클래스에 대한 프록시를 생성한다. Spring은 프록시를 활용해 트랜잭션을 시작하고 커밋하기 위해 메서드 실행 전후에 트랜잭션 로직을 실행한다.
+
+위와 같은 특성으로 인해 @Transactional 을 사용할 때 두 가지의 주의할 점이 있다.
+
+첫 번째는 클래스 내에서 자기 자신의 메서드를 호출하는 경우에는 _@Transactional_ 이 정상 동작하지 않는 것이다. _@Transactional_ 이 붙은 빈은 트랜잭션 관리를 위해 Spring이 자동으로 생성하는 프록시 객체를 통해 호출되는데 내부 호출은 프록시를 거치지 않기 때문에 트랜잭션이 동작하지 않는 것이다.
+
+즉, 다음과 같이 호출할 경우 @Transactional 이 동작하지 않게 된다.
 
 ```kotlin
-class GenericSpringEvent<T>(
-    val what: T,
-    val success: Boolean
-)
-```
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-* _**CustomSpringEvent**_와 다르게 _**GenericSpringEvent**_는 임의의 이벤트를 발행하는 유연성이 있으며 _**ApplicationEvent**_에서 확장할 필요가 없다.
+@Service
+public class TransactionalService {
 
-### 6.2. 수신자
+    @Transactional
+    public void methodA() {
+        // Do something that requires a transaction
+        System.out.println("methodA - Transaction started");
+        methodB(); // Self-invocation
+    }
 
-제네릭 이벤트에 대한 수신자를 만들어보자.
-
-먼저 _**ApplicationListener**_ 인터페이스를 구현하는 수신자를 만들어 보자.
-
-```kotlin
-@Component
-class GenericSpringEventListener : ApplicationListener<GenericSpringEvent<String>> {
-    override fun onApplicationEvent(event: GenericSpringEvent<String>) {
-        TODO("Not yet implemented")
+    @Transactional
+    public void methodB() {
+        // Do something else that requires a transaction
+        System.out.println("methodB - Transaction started");
     }
 }
 ```
 
-* _**ApplicationListener**_의 제네릭 타입에는 _**ApplicationEvent**_이나 해당 클래스의 자식만 선언할 수 있으므로 컴파일 에러가 발생한다.
-* 따라서 _**GenericSpringEvent**_가 _**ApplicationEvent**_를 상속해야만 사용이 가능하다.
+두 번째로 주의할 점은 _public_ 메서드에만 _@Transactional_ 을 붙어야 한다는 것이다. 다른 가시성에 대해서는 프록시가 동작하지 않으므로 _@Transactional_ 이 무시된다.
 
-상속하지 않고 _**@EventListener**_ 에 boolean SpEL 표현식을 정의하여 이벤트 수신자를 조건부로 이벤트를 처리하도록 만드는 것도 가능하다.
+### 4.2. Isolation Level 변경
 
-```kotlin
-@Component
-class AnnotationDrivenEventListener {
-    @EventListener(condition = "#event.success")
-    fun handleSuccessful(event: GenericSpringEvent<String>) {
-        println("Handling generic event (conditional).")
-    }
-}
-```
-
-### 6.3. 발행자
-
-이벤트 발행자 클래스는 다음과 같이 만들면 된다.
+다음과 같이 트랜잭션의 isolation level을 변경할 수 있다.
 
 ```kotlin
-@Component
-class GenericSpringEventPublisher(
-    val applicationEventPublisher: ApplicationEventPublisher,
-) {
-    fun publishEvent(message: String) {
-        println("Publishing generic event. ")
-        val genericEvent = GenericSpringEvent(message, true)
-        applicationEventPublisher.publishEvent(genericEvent)
-    }
-}
+@Transactional(isolation = Isolation.SERIALIZABLE)
 ```
 
-만약 @EventListener 을 명시한 메서드에서 null이 아닌 값을 반환할 경우 새로운 이벤트를 발행하게 된다.
+* 이는 Spring 4.1에서 도입되어 이전 버전에서는 예외가 발생한다.
+
+### 4.3. Read-Only 트랜잭션
+
+다음과 같이 트랜잭션에 Read-Only를 설정할 수 있다.
 
 ```kotlin
-@Component
-class AnnotationDrivenEventListener {
-    @EventListener
-    fun handleCustomEvent(event: CustomSpringEvent): CustomSpringEvent2 {
-        println("Handling custom event.")
-        return CustomSpringEvent2("message")
-    }
-
-    @EventListener
-    fun handleCustomEvent2(event: CustomSpringEvent2) {
-        println("Handling custom event2.")
-    }
-}
+@Transactional(readOnly = true)
 ```
 
-* 위와 같이 구현되어 있을 경우 CustomSpringEvent가 발행될 경우 handleCustomEvent가 호출되고, handleCustomEvent 메서드는 CustomSprintEvent2를 발행하여 handleCustomEvent2가 그 다음으로 호출된다.
+* 주의할 점은 _readOnly_가 true로 설정되어 있어도 삽입이나 업데이터가 발생하지 않을 것이라고 확신할 수 없다는 것이다. 이는 구현체에 따라 다르다.
 
-## 7. 트랜잭션 이벤트
-
-Spring 4.2부터 이벤트 수신자가 이벤트를 처리할 때 트랜잭션에 할당될 수 있도록 _**@EventListener**_의 확장인 _**@TransactionalEventListener**_ 을 제공한다.
-
-다음은 할당이 가능한 트랜잭션 단계이다.
-
-* _**AFTER\_COMMIT**_ : 트랜잭션이 성공적으로 완료된 경우 (default 값)
-* _**AFTER\_ROLLBACK**_ : 트랜잭션이 롤백된 경우
-* _**AFTER\_COMPLETION**_ : 트랜잭션이 완료된 경우 (AFTER\_COMMIT, AFTER\_ROLLBACK)
-* _**BEFORE\_COMMIT**_ : 트랜잭션 커밋 직전
-
-트랜잭션 이벤트 수신자를 만들어보자.
+_readOnly_ 는 트랜잭션 내부에서만 동작하므로 트랜잭션 컨텍스트 외부에서 작업이 발생하면 _readOnly_가 무시된다.
 
 ```kotlin
-@TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
-fun handleCustom(event: CustomSpringEvent) {
-    println("Handling event inside a transaction BEFORE COMMIT")
-}
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 ```
 
-* 이 수신자는 이벤트 생성자가 커밋되려고 하는 트랜잭션이 있는 경우에만 호출된다.
-* 실행중인 트랜잭션이 없으면 _**fallbackExecution**_ 속성을 _**true**_로 설정해야 한다.
-  * 이를 재정의 하지 않는 한 이벤트가 전혀 발행되지 않는다.
+* 이처럼 트랜잭션 컨텍스트가 아닐 경우에는 readOnly가 무시될 수 있다.
 
-## 8. 예제 코드
+### 4.4. 트랜잭션 로깅
 
-예제 코드는 다음 링크에서 확인 가능합니다.
+트랜잭션 관련 문제를 디버깅 할 때 유용한 방법은 트랜잭션 패키지에 대한 로깅을 수정하는 것이다.
 
-{% embed url="https://github.com/LeeSM0518/notification-service/tree/%231/feat/apply-tutorial-about-spring-events" %}
+패키지는 _“org.springframework.transaction”_ 이며, _TRACE_ 로 로깅 레벨을 설정하면 된다.
 
-## 9. 참고
+## 5. 동작 원리
 
-{% embed url="https://www.baeldung.com/spring-events" %}
+{% embed url="https://www.marcobehler.com/guides/spring-transaction-management-transactional-in-depth" %}
+
+## 6. 참고
+
+{% embed url="https://www.baeldung.com/transaction-configuration-with-jpa-and-spring" %}
