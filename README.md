@@ -12,6 +12,8 @@ coverY: 0
 * 간편한 운영
   * 환경별 로그인, 누적 사용자 통계 제공
 
+
+
 ## 2. 네이버 로그인 서비스 소개
 
 ### 2.1. 제공하는 기능
@@ -23,6 +25,8 @@ coverY: 0
 * 서비스 이용 통계 제공
 * 네이버 로그인 뱃지
 
+
+
 ## 3. 네이버 로그인 적용
 
 ### 3.1. 네이버 로그인 적용 전 점검 사항
@@ -33,6 +37,8 @@ coverY: 0
 
 [_→ 애플리케이션 등록 가이드_](https://developers.naver.com/docs/common/openapiguide/appregister.md)
 
+
+
 #### 3.1.2. 필수 항목 확인
 
 1. 애플리케이션 이름은 명확하고 간결하게 작성
@@ -42,11 +48,15 @@ coverY: 0
 5. 웹 서비스 환경에서는 서비스의 대표 URL이 입력되어야 한다.
 6. 애플리케이션 환경에서는 AppScheme와 package name을 정확하게 입력이 되어야 한다.
 
+
+
 #### 3.1.3. 사전 검수 요청
 
 실제 서비스에 적용하고자 한다면 애플리케이션 검수 요청을 등록해야 한다.
 
 [_→ 검수 가이드_](https://developers.naver.com/docs/login/verify/verify.md)
+
+
 
 ### 3.2. 네이버 로그인 버튼 적용 가이드
 
@@ -54,6 +64,8 @@ coverY: 0
 *   네이버 로그인 버튼 이미지
 
     [_→ 로그인 버튼 사용 가이드_](https://developers.naver.com/docs/login/bi/bi.md)
+
+
 
 ### 3.3. 회원 정보 확인 및 기존 회원과의 연동
 
@@ -80,6 +92,8 @@ coverY: 0
 
 <figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
+
+
 ### 3.4. 네이버 로그인 연동 개발하기
 
 #### 3.4.1. 네이버 로그인 연동을 개발하기에 앞서
@@ -88,12 +102,16 @@ coverY: 0
 
 등록한 후에 애플리케이션의 Client ID와 Client Secret 값을 확인할 수 있다.
 
-\<aside> 💡 _**ClientID와 ClientSecret에 대하여**_
+{% hint style="info" %}
+_**ClientID와 ClientSecret에 대하여**_
 
 ClientID와 ClientSecret은 애플리케이션을 구분해주는 정보이다.
 
 * ClientID : 알파뱃 대소문자, 숫자가 조합된 40자리 이하의 문자열
-* ClientSecret : 알파뱃 대소문자, 숫자가 조합된 40자리 이하의 문자열 \</aside>
+* ClientSecret : 알파뱃 대소문자, 숫자가 조합된 40자리 이하의 문자열&#x20;
+{% endhint %}
+
+
 
 #### 3.4.2. 네이버 로그인 연동 URL 생성하기
 
@@ -107,6 +125,8 @@ ClientID와 ClientSecret은 애플리케이션을 구분해주는 정보이다.
   * 출력 포맷 : URL 리다이렉트
   * 설명 : 네이버 로그인 인증 요청
 
+
+
 #### 네이버 로그인 연동 API
 
 _**요청 URL 정보**_
@@ -114,6 +134,8 @@ _**요청 URL 정보**_
 | 메서드        | 요청 URL                                                                               | 출력 포맷     | 설명            |
 | ---------- | ------------------------------------------------------------------------------------ | --------- | ------------- |
 | GET / POST | [https://nid.naver.com/oauth2.0/authorize](https://nid.naver.com/oauth2.0/authorize) | URL 리다이렉트 | 네이버 로그인 인증 요청 |
+
+
 
 _**요청 변수 정보**_
 
@@ -130,6 +152,8 @@ _**요청문 샘플**_
 <https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=CLIENT_ID&state=STATE_STRING&redirect_uri=CALLBACK_URL>
 ```
 
+
+
 #### 3.4.3. 네이버 로그인 연동 결과 Callback 정보
 
 네이버 로그인 인증 요청 API를 호출했을 때 사용자가 네이버로 로그인하지 않은 상태이면 네이버 로그인 화면으로 이동하고, 사용자가 로그인한 상태이면 기본 정보 제공 동의 확인 화면으로 이동한다.
@@ -140,17 +164,16 @@ code 값은 접근 토큰 발급 요청에 사용한다.
 
 API 요청 실패시에는 에러 코드와 에러 메시지가 전송된다.
 
+
+
 _**Callback 응답 정보**_
 
 * API 요청 성공시 : [http://콜백URL/redirect?code={code값}\&state={state값}](http://xn--url-l50nw08e/redirect?code=%7Bcode%EA%B0%92%7D\&state=%7Bstate%EA%B0%92%7D)
 * API 요청 실패시 : [http://콜백URL/redirect?state={state값}\&error={에러코드값}\&error\_description={에러메시지}](http://xn--url-l50nw08e/redirect?state=%7Bstate%EA%B0%92%7D\&error=%7B%EC%97%90%EB%9F%AC%EC%BD%94%EB%93%9C%EA%B0%92%7D\&error\_description=%7B%EC%97%90%EB%9F%AC%EB%A9%94%EC%8B%9C%EC%A7%80%7D)
 
-| 필드                 | 타입     | 설명                                                        |
-| ------------------ | ------ | --------------------------------------------------------- |
-| code               | string | 네이버 로그인 인증에 성공하면 반환받는 인증 코드, 접근 토큰(access token) 발급에 사용   |
-| state              | string | 사이트 간 요청 위조 공격을 방지하기 위해 애플리케이션에서 생성한 토큰값으로 URL 인코딩을 적용한 값 |
-| error              | string | 네이버 로그인 인증에 실패하면 반환받는 에러 코드                               |
-| error\_description | string | 네이버 로그인 인증에 실패하면 반환받는 에러 메시지                              |
+<table><thead><tr><th width="214">필드</th><th>타입</th><th>설명</th></tr></thead><tbody><tr><td>code</td><td>string</td><td>네이버 로그인 인증에 성공하면 반환받는 인증 코드, 접근 토큰(access token) 발급에 사용</td></tr><tr><td>state</td><td>string</td><td>사이트 간 요청 위조 공격을 방지하기 위해 애플리케이션에서 생성한 토큰값으로 URL 인코딩을 적용한 값</td></tr><tr><td>error</td><td>string</td><td>네이버 로그인 인증에 실패하면 반환받는 에러 코드</td></tr><tr><td>error_description</td><td>string</td><td>네이버 로그인 인증에 실패하면 반환받는 에러 메시지</td></tr></tbody></table>
+
+
 
 #### 3.4.4. 접근 토큰 발급 요청
 
@@ -162,6 +185,8 @@ Callback으로 전달받은 정보를 이용하여 접근 토큰을 발급받을
 
 ‘code’ 값을 이용한 API 호출은 최초 1번만 수행할 수 있으며 접근 토큰 발급이 완료되면 사용된 ‘code’는 더 이상 재사용할 수 없다.
 
+
+
 #### 접근 토큰 발급 API
 
 _**요청 URL 정보**_
@@ -170,24 +195,21 @@ _**요청 URL 정보**_
 | ---------- | ---------------------------------------------------------------------------- | ----- | ---------- |
 | GET / POST | [https://nid.naver.com/oauth2.0/token](https://nid.naver.com/oauth2.0/token) | json  | 접근토큰 발급 요청 |
 
+
+
 _**요청 변수 정보**_
 
-| 요청 변수 정보          | 타입     | 필수 여부   | 기본값     | 설명                                                                                 |
-| ----------------- | ------ | ------- | ------- | ---------------------------------------------------------------------------------- |
-| grant\_type       | string | Y       | -       | 인증 과정에 대한 구분값 1) 발급: ‘authorization\_code’ 2) 갱신: ‘refresh\_token’ 3) 삭제: ‘delete’ |
-| client\_id        | string | Y       | -       | 애플리케이션 등록 시 발급받은 Client ID 값                                                       |
-| client\_secret    | string | Y       | -       | 애플리케이션 등록시 발급받은 Client secret 값                                                    |
-| code              | string | 발급 때 필수 | -       | 로그인 인증 요청 API 호출에 성공하고 리턴받은 인증코드 값 (authorization code)                            |
-| state             | string | 발급 때 필수 | -       | 애플리케이션에서 생성한 상태 토큰값으로 URL 인코딩을 적용한 값을 사용                                           |
-| refresh\_token    | string | 갱신 때 필수 | -       | 네이버 사용자 인증에 성공하고 발급받은 갱신 토큰 (refresh token)                                        |
-| access\_token     | string | 삭제 때 필수 | -       | 기 발급받은 접근 토큰으로 URL 인코딩을 적용한 값을 사용                                                  |
-| service\_provider | string | 삭제 때 필수 | ‘NAVER’ | 인증 제공자 이름으로 ‘NAVER’로 세팅해 전송                                                        |
+<table><thead><tr><th width="188">요청 변수 정보</th><th>타입</th><th>필수 여부</th><th>기본값</th><th>설명</th></tr></thead><tbody><tr><td>grant_type</td><td>string</td><td>Y</td><td>-</td><td>인증 과정에 대한 구분값 1) 발급: ‘authorization_code’ 2) 갱신: ‘refresh_token’ 3) 삭제: ‘delete’</td></tr><tr><td>client_id</td><td>string</td><td>Y</td><td>-</td><td>애플리케이션 등록 시 발급받은 Client ID 값</td></tr><tr><td>client_secret</td><td>string</td><td>Y</td><td>-</td><td>애플리케이션 등록시 발급받은 Client secret 값</td></tr><tr><td>code</td><td>string</td><td>발급 때 필수</td><td>-</td><td>로그인 인증 요청 API 호출에 성공하고 리턴받은 인증코드 값 (authorization code)</td></tr><tr><td>state</td><td>string</td><td>발급 때 필수</td><td>-</td><td>애플리케이션에서 생성한 상태 토큰값으로 URL 인코딩을 적용한 값을 사용</td></tr><tr><td>refresh_token</td><td>string</td><td>갱신 때 필수</td><td>-</td><td>네이버 사용자 인증에 성공하고 발급받은 갱신 토큰 (refresh token)</td></tr><tr><td>access_token</td><td>string</td><td>삭제 때 필수</td><td>-</td><td>기 발급받은 접근 토큰으로 URL 인코딩을 적용한 값을 사용</td></tr><tr><td>service_provider</td><td>string</td><td>삭제 때 필수</td><td>‘NAVER’</td><td>인증 제공자 이름으로 ‘NAVER’로 세팅해 전송</td></tr></tbody></table>
+
+
 
 _**요청문 샘플**_
 
 ```
 <https://nid.naver.com/oauth2.0/token?grant_type=authorization_code&client_id=jyvqXeaVOVmV&client_secret=527300A0_COq1_XV33cf&code=EIc5bFrl4RibFls1&state=9kgsGTfH4j7IyAkg>
 ```
+
+
 
 _**응답 정보**_
 
@@ -204,6 +226,8 @@ _**응답 정보**_
 
 접근 토큰을 이용하면 **프로필 정보 조회 API를 호출**하거나 오픈 API를 호출하는 것이 가능하다.
 
+
+
 #### 프로필 정보 조회 API
 
 _**요청 URL 정보**_
@@ -212,9 +236,13 @@ _**요청 URL 정보**_
 | ---------- | -------- | -------------------------------------------------------------------------- | ----- | --------- |
 | GET / POST | OAuth2.0 | [https://openapi.naver.com/v1/nid/me](https://openapi.naver.com/v1/nid/me) | json  | 프로필 정보 조회 |
 
+
+
 _**요청 변수 정보**_
 
 요청 변수는 별도로 없으며, 요청 URL로 호출할 때 아래와 같이 요청 헤더에 접근 토큰 값을 전달하면 된다.
+
+
 
 _**요청 헤더**_
 
@@ -222,12 +250,16 @@ _**요청 헤더**_
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Authorization | <p>접근 토큰(access token)을 전달하는 헤더<br>다음과 같은 형식으로 헤더 값에 접근 토큰(access token)을 포함한다. 토큰 타입은 “Bearer”로 값이 고정되어 있다.<br><br>Authorization: {토큰 타입} {접근 토큰}</p> |
 
+
+
 _**요청문 예시**_
 
 ```bash
 curl -XGET "<https://openapi.naver.com/v1/nid/me>" \\
      -H "Authorization: Bearer AAAAPIuf0L+qfDkMABQ3IJ8heq2mlw71DojBj3oc2Z6OxMQESVSrtR0dbvsiQbPbP1/cxva23n7mQShtfK4pchdk/rc="
 ```
+
+
 
 _**출력 결과**_
 
@@ -246,9 +278,13 @@ _**출력 결과**_
 | response/birthyear      | string | Y     | 출생연도                       |
 | response/mobile         | string | Y     | 휴대전화번호                     |
 
+
+
 #### 3.4.6. 접근 토큰을 이용하여 사용자 허용 프로필 권한 확인하기
 
 사용자가 제공을 허용한 프로필의 항목을 확인
+
+
 
 _**요청 URL 정보**_
 
@@ -256,11 +292,15 @@ _**요청 URL 정보**_
 | ---------- | -------- | ---------------------------------------------------------------------------------- | ----- | ---------------- |
 | GET / POST | OAuth2.0 | [https://openapi.naver.com/v1/nid/verify](https://openapi.naver.com/v1/nid/verify) | json  | 접근 토큰 검증 및 권한 확인 |
 
+
+
 _**요청 변수 정보**_
 
 | 요청 변수 정보 | 타입      | 필수 여부 | 기본값   | 설명                  |
 | -------- | ------- | ----- | ----- | ------------------- |
 | info     | boolean | N     | false | true일 경우 권한 설정정보 응답 |
+
+
 
 _**요청 헤더**_
 
@@ -268,10 +308,14 @@ _**요청 헤더**_
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Authorization | <p>접근 토큰(access token)을 전달하는 헤더<br>다음과 같은 형식으로 헤더 값에 접근 토큰(access token)을 포함한다. 토큰 타입은 “Bearer”로 값이 고정되어 있다.<br><br>Authorization: {토큰 타입} {접근 토큰}</p> |
 
+
+
 ### 3.5. 네이버의 로그인오픈 API의 이용
 
 * [카페 오픈 API](https://developers.naver.com/products/login/cafe/cafe.md)
 * [캘린더 오픈 API](https://developers.naver.com/products/login/calendar/calendar.md)
+
+
 
 ## 4. 시스템에 네이버 로그인 정보 유지
 
@@ -282,6 +326,8 @@ _**요청 헤더**_
 _**일반적인 회원 데이터베이스 구조**_
 
 <figure><img src=".gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+
+
 
 _**테이블 구조 및 테이블 생성 SQL 예시**_
 
@@ -301,9 +347,13 @@ create table users (
 );
 ```
 
+
+
 _**네이버 로그인 연동을 위한 테이블 구성**_
 
 <figure><img src=".gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+
+
 
 _**네이버 로그인 사용자 정보를 저장하기 위한 테이블 구조 및 생성 SQL 예시**_
 
@@ -321,6 +371,8 @@ create table sns_info (
 );
 ```
 
+
+
 #### 4.1.2. 사용자 연동 처리 및 로그인 처리
 
 사용자 유니크 ID(sns\_id)를 사용하여 사용자 정보를 조회할 수 있다.
@@ -334,15 +386,17 @@ where a.id = b.id and b.sns_id = :snsId
 
 * 사용자에 대한 조회가 완료되었을 경우 세션에 로그인 정보를 발행하거나 쿠키로 로그인 정보를 발행하여 로그인 상태로 만들 수 있다.
 
-### 4.2. 신규 시스템에 네이버 로그인 적용하기
 
-***
+
+### 4.2. 신규 시스템에 네이버 로그인 적용하기
 
 #### 4.2.1. Database의 구성
 
 _**네이버 로그인 연동을 위한 테이블 구성**_
 
 <figure><img src=".gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
+
+
 
 _**네이버 로그인 사용자 정보를 저장하기 위한 테이블 구조 및 생성 SQL 예시 (MYSQL)**_
 
@@ -364,6 +418,8 @@ create table users (
 );
 ```
 
+
+
 #### 4.2.2. 네이버 로그인을 통한 회원 가입
 
 네이버 로그인을 통하여 얻은 사용자 유니크 ID 정보를 이용하여 사용자를 식별할 수 있다.
@@ -374,6 +430,8 @@ create table users (
 insert into sns_info(id, sns_id, sns_type, sns_name, sns_profile, sns_connect_date)
 values (:id, :snsId, :snsType, :snsName, :snsProfile, now())
 ```
+
+
 
 #### 4.2.3. 네이버 로그인을 통한 로그인/로그아웃의 구현
 
@@ -386,6 +444,8 @@ from users a, sns_info b
 where a.id = b.id and b.sns_id = :snsId
 ```
 
+
+
 ## 5. 네이버 로그인 사용자 프로필 갱신 및 재인증
 
 ### 5.1. 네이버 로그인 사용자의 프로필 갱신
@@ -393,6 +453,8 @@ where a.id = b.id and b.sns_id = :snsId
 #### 5.1.1. 접근 토큰에 대하여
 
 접근 토큰 발급 API를 통하여 접근 토큰 및 갱신 토큰을 발급받을 수 있다.
+
+
 
 _**접근 토큰 API 응답형태**_
 
@@ -405,15 +467,21 @@ _**접근 토큰 API 응답형태**_
 }
 ```
 
+
+
 _**접근 토큰 규격**_
 
 * access\_token : 알파벳 대소문자, 숫자, 특수문자 (+/=)가 조합된 256자리 이하의 문자열
 * refresh\_token : 알파벳 대소문자, 숫자가 조합된 256자리 이하의 문자열
 * expires\_in : 숫자, 발급 시점부터 expires\_in(초) 후 까지 유효
 
+
+
 _**접근 토큰의 용도**_
 
 접근 토큰은 사용자 프로필 조회 API를 호출하거나 네이버에서 제공하는 로그인 OpenAPI를 이용할 때 사용자 인증값으로 이용된다.
+
+
 
 _**접근 토큰 사용 방법**_
 
@@ -421,6 +489,8 @@ _**접근 토큰 사용 방법**_
 
 * 요청 헤더명 : Authorization
 * 요청 헤더값 형식 : TOKEN\_TYPE ACCESS\_TOKEN
+
+
 
 _**접근 토큰을 포함한 응답헤더 예시**_
 
@@ -441,6 +511,8 @@ Accept: */*
 Authorization: Bearer ACCESS_TOKEN
 ```
 
+
+
 #### 5.1.2. 갱신 토큰에 대하여
 
 접근 토큰은 발급 후 expires\_in(기본 3600초 / 1시간) 이내에만 사용이 가능하며 expires\_in(초) 만큼의 시간이 지나면 접근 토큰은 더 이상 사용할 수 없다.
@@ -449,6 +521,8 @@ Authorization: Bearer ACCESS_TOKEN
 
 갱신 토큰은 접근 토큰이 만료될 것을 대비하여 데이터베이스에 별도로 저장하고 이후 필요에 따라 갱신 토큰을 사용하면 된다.
 
+
+
 #### 접근 토큰 갱신 API
 
 _**요청 URL 정보**_
@@ -456,6 +530,8 @@ _**요청 URL 정보**_
 | 메서드        | 요청 URL                                                                       | 출력 포맷 | 설명                    |
 | ---------- | ---------------------------------------------------------------------------- | ----- | --------------------- |
 | GET / POST | [https://nid.naver.com/oauth2.0/token](https://nid.naver.com/oauth2.0/token) | json  | 갱신토큰을 이용한 접근토큰 재발급 요청 |
+
+
 
 _**요청 변수 정보**_
 
@@ -466,11 +542,15 @@ _**요청 변수 정보**_
 | refresh\_token | string | Y     | -   | 접근토큰 발급 API를 통하여 발급받은 갱신토큰 값    |
 | grant\_type    | string | Y     | -   | 요청 타입. refresh\_token으로 설정      |
 
+
+
 _**요청문 샘플**_
 
 ```
 <https://nid.naver.com/oauth2.0/token?grant_type=refresh_token&client_id=CLIENT_ID&client_secret=CLIENT_SECRET&refresh_token=REFRESH_TOKEN>
 ```
+
+
 
 _**응답 정보**_
 
@@ -479,6 +559,8 @@ _**응답 정보**_
 | access\_token | string  | 재발급 받은 접근토큰        |
 | token\_type   | string  | 토큰 타입 (bearer)     |
 | expires\_in   | integer | 접근 토큰의 유효 기간(초 단위) |
+
+
 
 #### 5.1.3. 접근 토큰 만료와 갱신 주기. 프로필 정보의 갱신
 
@@ -489,6 +571,8 @@ _**응답 정보**_
 * 프로필 정보 조회 API 호출 시 응답이 정상적으로 전달될 경우 접근 토큰은 유효하다고 할 수 있다.
 * 접근 토큰 유효성 체크 API 호출을 통해 현재 접근 토큰이 유효한지 판단할 수 있다.
 
+
+
 #### 접근 토큰 유효성 체크 API
 
 _**요청 URL 정보**_
@@ -497,15 +581,21 @@ _**요청 URL 정보**_
 | ---------- | -------------------------------------------------------------------------- | ----- | ------------ |
 | GET / POST | [https://openapi.naver.com/v1/nid/me](https://openapi.naver.com/v1/nid/me) | json  | 접근 토큰 유효성 체크 |
 
+
+
 _**요청 변수 정보**_
 
 요청 변수는 별도로 없으며, 요청 URL로 호출할 때 아래와 같이 요청 헤더에 접근 토큰 값을 전달하면 된다.
+
+
 
 _**요청 헤더**_
 
 | 요청 헤더명        | 설명                                                                                                                                                     |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Authorization | <p>접근 토큰(access token)을 전달하는 헤더<br>다음과 같은 형식으로 헤더 값에 접근 토큰(access token)을 포함한다. 토큰 타입은 “Bearer”로 값이 고정되어 있다.<br><br>Authorization: {토큰 타입} {접근 토큰}</p> |
+
+
 
 _**요청문 샘플**_
 
@@ -514,12 +604,16 @@ curl -XGET "<https://openapi.naver.com/v1/nid/verify>" \\
 		 -H "Authorization: Bearer ..."
 ```
 
+
+
 _**응답 정보**_
 
 | 필드         | 타입     | 설명                 |
 | ---------- | ------ | ------------------ |
 | resultcode | string | API 호출 결과 코드       |
 | message    | string | 접근토큰 유효성 체크 결과 메시지 |
+
+
 
 #### 5.1.4. 프로필의 갱신
 
@@ -529,9 +623,13 @@ _**응답 정보**_
 
 따라서 주기적으로 또는 사용자 로그인이 발생할 때마다 프로필 정보를 조회하여 갱신하는 것을 권장하고 있다.
 
+
+
 #### 5.1.5. 사용자가 거부한 프로필 권한에 대하여 다시 동의를 수행하는 경우
 
 제공이 거부된 프로필 항목이 서비스 이용에 반드시 필요한 항목일 경우에는 사용자로 하여금 재동의를 수행해야 한다.
+
+
 
 #### 네이버 로그인 재동의 API
 
@@ -540,6 +638,8 @@ _**요청 URL 정보**_
 | 메서드        | 요청 URL                                                                               | 출력 포맷     | 설명            |
 | ---------- | ------------------------------------------------------------------------------------ | --------- | ------------- |
 | GET / POST | [https://nid.naver.com/oauth2.0/authorize](https://nid.naver.com/oauth2.0/authorize) | URL 리다이렉트 | 네이버 로그인 인증 요청 |
+
+
 
 _**요청 변수 정보**_
 
@@ -551,11 +651,15 @@ _**요청 변수 정보**_
 | state          | string | Y     | -    | 사이트 간 요청 위조(cross-site request forgery) 공격을 방지하기 위해 애플리케이션에서 생성한 상태 토큰값으로 URL 인코딩을 적용한 값을 사용 |
 | auth\_type     | string | Y     | -    | 재동의 요청의 경우 ‘reprompt’로 전송해야 함                                                                |
 
+
+
 _**요청문 샘플**_
 
 ```
 <https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=CLIENT_ID&state=STATE_STRING&redirect_uri=CALLBACK_URI&auth_type=reprompt>
 ```
+
+
 
 ### 5.2. 재인증
 
@@ -576,6 +680,8 @@ _**요청문 샘플**_
 3. ID/PW 입력
 4. 인증 완료
 
+
+
 #### 네이버 로그인 재인증 API
 
 _**요청 URL 정보**_
@@ -583,6 +689,8 @@ _**요청 URL 정보**_
 | 메서드        | 요청 URL                                                                               | 출력 포맷     | 설명            |
 | ---------- | ------------------------------------------------------------------------------------ | --------- | ------------- |
 | GET / POST | [https://nid.naver.com/oauth2.0/authorize](https://nid.naver.com/oauth2.0/authorize) | URL 리다이렉트 | 네이버 로그인 인증 요청 |
+
+
 
 _**요청 변수 정보**_
 
@@ -594,11 +702,15 @@ _**요청 변수 정보**_
 | state          | string | Y     | -    | 사이트 간 요청 위조(cross-site request forgery) 공격을 방지하기 위해 애플리케이션에서 생성한 상태 토큰값으로 URL 인코딩을 적용한 값을 사용 |
 | auth\_type     | string | Y     | -    | 재동의 요청의 경우 ‘reauthenticate’로 전송해야 함                                                          |
 
+
+
 _**요청문 샘플**_
 
 ```
 <https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=CLIENT_ID&state=STATE_STRING&redirect_uri=CALLBACK_URI&auth_type=reauthenticate>
 ```
+
+
 
 ### 5.3. 네이버 로그인 연동 해제
 
@@ -612,6 +724,8 @@ _**요청문 샘플**_
 * 네이버 로그인 연동 목록에서 항목 제거
 * 새로 연동할 경우 사용자 동의를 다시 받음
 
+
+
 #### 네이버 로그인 연동 해제 API
 
 _**요청 URL 정보**_
@@ -619,6 +733,8 @@ _**요청 URL 정보**_
 | 메서드        | 요청 URL                                                                       | 출력 포맷     | 설명                |
 | ---------- | ---------------------------------------------------------------------------- | --------- | ----------------- |
 | GET / POST | [https://nid.naver.com/oauth2.0/token](https://nid.naver.com/oauth2.0/token) | URL 리다이렉트 | 접근토큰을 이용한 연결해제 요청 |
+
+
 
 _**요청 변수 정보**_
 
@@ -629,11 +745,15 @@ _**요청 변수 정보**_
 | access\_token  | string | Y     | -   | 유효한 접근토큰 값                      |
 | grant\_type    | string | Y     | -   | 요청 타입. delete 로 설정              |
 
+
+
 _**요청문 샘플**_
 
 ```
 <https://nid.naver.com/oauth2.0/token?grant_type=delete&client_id=CLIENT_ID&client_secret=CLIENT_SECERT&access_token=ACCESS_TOKEN>
 ```
+
+
 
 _**응답 정보**_
 
@@ -643,6 +763,8 @@ _**응답 정보**_
 | result        | string | 처리결과 (success) |
 
 * 연동 해제를 수행하기 전에 접근 토큰의 유효성을 점검하고 접근토큰을 갱신한 후에 수행하는 것을 권장한다.
+
+
 
 ## 6. 네이버 로그인 부가 기능
 
@@ -663,11 +785,15 @@ _**응답 정보**_
 3. Callback 페이지에서 연동 처리 또는 오류 사항에 대한 처리
 4. 로그인 완료
 
+
+
 #### 6.1.2. 제약사항
 
 본 기능은 “네이버 앱”에서 서비스의 웹페이즈를 접근하는 경우에만 수행이 가능하다.
 
 [_**관련 링크**_](https://developers.naver.com/docs/login/devguide/devguide.md#6--%EB%84%A4%EC%9D%B4%EB%B2%84-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EB%B6%80%EA%B0%80-%EA%B8%B0%EB%8A%A5)
+
+
 
 ### 6.2. 네이버 로그인 플러스
 
@@ -675,13 +801,15 @@ _**응답 정보**_
 
 [_**관련 링크**_](https://developers.naver.com/docs/login/devguide/devguide.md#6-2-%EB%84%A4%EC%9D%B4%EB%B2%84-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%ED%94%8C%EB%9F%AC%EC%8A%A4)
 
+
+
 ## 7. 튜토리얼
 
 먼저 [애플리케이션 등록](https://developers.naver.com/apps/#/register?api=nvlogin)을 수행한다.
 
 <figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-* Client ID와 Client Secret 정보를 복사한다.
+* 등록한 후에 Client ID와 Client Secret 정보를 복사하여 사용한다.
 
 ### 7.1. 프로세스 설계
 
@@ -712,6 +840,8 @@ F->>B: 회원가입 요청
 B-->>F: 회원가입 응답
 ```
 
+
+
 #### 7.1.2. 로그인
 
 ```mermaid
@@ -736,9 +866,13 @@ note over B: 회원 정보가 존재하는지 확인
 B-->>F: Access Token과 Refresh Token 응답
 ```
 
+
+
 ### 7.2. 예제 코드
 
 {% embed url="https://github.com/LeeSM0518/oauth-tutorial" %}
+
+
 
 ## 8. 참고
 
