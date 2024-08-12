@@ -40,11 +40,139 @@ Pagination은 대용량 데이터를 응답할 때 필수적이다. Pagination�
 
 
 
-## 4. 예제
+## 4. WebFlux와 Data Reactive를 활용한 Pagination 예제 코드
 
-### 4.1. WebFlux와 Data Reactive를 활용한 Pagination 구현
+***
+
+_Page_와 _Size_ 정보를 갖고 있는 _Pageable_ 객체를 통해 Repository로부터 페이징된 목록을 조회할 수 있다.
+
+```kotlin
+@Repository
+interface NotificationRepository : CoroutineCrudRepository<NotificationEntity, UUID> {
+
+    suspend fun findAllByReceiverIdOrderByNotifiedDateDesc(
+        receiverId: UUID,
+        pageable: Pageable,
+    ): Flow<NotificationEntity>
+
+    suspend fun countByReceiverId(
+        receiverId: UUID,
+    ): Long
+}
+```
+
+* 페이징 정보와 별도로 전체 개수를 조회할 수 있도록 구성함
 
 
 
+Repository로부터 페이징된 리스트를 조회하기 위해 다음과 같이 _PageRequest.of_를 활용하여 _Pageable_ 객체를 생성한다.
+
+```kotlin
+data class GetNotificationsRequest(
+    val memberId: UUID,
+    private val page: Int,
+    private val size: Int,
+) {
+    val pageable: Pageable = PageRequest.of(page, size)
+}
+```
+
+```kotlin
+@Component
+class NotificationQueryAdapter(
+    private val notificationRepository: NotificationRepository,
+) : LoadNotificationPort {
+
+    override suspend fun loadCount(memberId: UUID): Long =
+        notificationRepository.countByReceiverId(memberId)
+
+    override suspend fun loadNotifications(request: GetNotificationsRequest): Flow<Notification> =
+        notificationRepository
+            .findAllByReceiverIdOrderByNotifiedDateDesc(request.memberId, request.pageable)
+            .map { it.toDomain() }
+}
+```
 
 
+
+그 후 조회된 결과와 전체 개수로 PageImpl 객체를 생성한다.
+
+```kotlin
+@Service
+class NotificationQueryService(
+    private val loadNotificationPort: LoadNotificationPort,
+) : GetNotificationUseCase {
+
+    override suspend fun getNotifications(request: GetNotificationsRequest): Page<NotificationResponse> {
+        val notifications = loadNotificationPort.loadNotifications(request).map { it.toResponse() }
+        val count = loadNotificationPort.loadCount(request.memberId)
+        return PageImpl(notifications.toList(), request.pageable, count)
+    }
+
+}
+```
+
+
+
+Page 정보를 곧바로 응답하면 에러가 발생하므로, 다음과 같이 PageResponse 사용자 정의 객체로 변환하여 응답한다.
+
+```kotlin
+data class PageResponse<T>(
+    val data: List<T>,
+    val pageable: PageableResponse,
+) {
+    companion object {
+        fun <T> Page<T>.toResponse() =
+            PageResponse(
+                data = this.content,
+                pageable = this.toPageable(),
+            )
+    }
+
+    data class PageableResponse(
+        val totalPages: Int,
+        val totalElements: Long,
+    ) {
+        companion object {
+            fun Page<*>.toPageable() =
+                PageableResponse(
+                    totalPages = this.totalPages,
+                    totalElements = this.totalElements
+                )
+        }
+    }
+}
+```
+
+```kotlin
+@RestController
+class NotificationRouter(
+    private val getMemberUseCase: GetMemberUseCase,
+    private val getNotificationUseCase: GetNotificationUseCase,
+) {
+
+    @GetMapping("/notifications")
+    suspend fun getNotifications(
+        @RequestHeader(AUTHORIZATION)
+        authorization: String,
+        @RequestParam(name = "page", defaultValue = "0")
+        page: Int,
+        @RequestParam(name = "size", defaultValue = "10")
+        size: Int,
+    ): PageResponse<NotificationResponse> {
+        val memberId: UUID = getMemberUseCase.getMemberIdBy(authorization)
+        val request = GetNotificationsRequest(memberId, page, size)
+        val notifications: Page<NotificationResponse> = getNotificationUseCase.getNotifications(request)
+        return notifications.toResponse()
+    }
+
+}
+```
+
+
+
+## 5. 예제 저장소
+
+***
+
+{% embed url="https://github.com/LeeSM0518/notification-service/commit/a1bfabd573a3fb89b5c293eb4cc969400101317b" %}
