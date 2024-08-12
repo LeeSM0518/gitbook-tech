@@ -176,3 +176,10 @@ class NotificationRouter(
 ***
 
 {% embed url="https://github.com/LeeSM0518/notification-service/commit/a1bfabd573a3fb89b5c293eb4cc969400101317b" %}
+
+## 6. 참고
+
+***
+
+{% embed url="https://www.baeldung.com/spring-data-webflux-pagination" %}
+
