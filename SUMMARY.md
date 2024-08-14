@@ -1,20 +1,20 @@
 # Table of contents
 
-## OAuth2
-
-* [네이버 로그인](README.md)
-
 ## Spring
 
+* [Pagination](README.md)
+* [@Transactional](<README (3).md>)
 * [Spring AOP](<README (4).md>)
 * [Spring Events](<README (3) (1).md>)
 * [Spring SSE(Server-Sent Events)](spring/spring-sse-server-sent-events.md)
-* [Pagination](spring/pagination.md)
-* [@Transactional](<README (3).md>)
 
 ## Kotlin
 
 * [Coroutines](<README (2).md>)
+
+## OAuth2
+
+* [네이버 로그인](<README (5).md>)
 
 ## Redis
 
