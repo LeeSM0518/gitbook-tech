@@ -13,7 +13,7 @@ AOP(Aspect Oriented Programming, 관심 지향 프로그래밍)는 관심사를 
 
 AOP와 관련된 개념과 용어를 살펴보자.
 
-<figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 ### 2.1. Business Object
 

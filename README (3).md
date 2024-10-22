@@ -1,172 +1,185 @@
 ---
-cover: .gitbook/assets/Frame 81.png
+description: Pagination in Spring Webflux and Spring Data Reactive
+cover: ../.gitbook/assets/Frame 81.png
 coverY: 0
 ---
 
-# @Transactional
+# Pagination
 
 ## 1. 개요
 
-Spring 트랜잭션을 올바르게 구성하는 방법과 _@Transactional_ 을 잘 사용하는 방법 및 잘못된 사용 방법에 대해 알아보자.
+***
 
-## 2. 트랜잭션 설정
+본 글에는 다음 세 가지에 대해 작성되어 있다.
 
-_@Configuration_ 클래스에 _**@EnableTransactionManagement**_ 를 사용하여 트랜잭션을 활성화 할 수 있다.
+1. _데이터 조회에 있어서 Pagination의 중요성_
+2. _Pagination 사용에 있어서 Spring Data Reactive와 Spring Data의 차이점_
+3. _Pagination 구현 예제_
+
+
+
+## 2. Pagination의 중요성
+
+***
+
+Pagination은 대용량 데이터를 응답할 때 필수적이다. Pagination은 **대용량 데이터를 작은 덩어리인 페이지 단위로 나누어 데이터를 효율적으로 조회하고 응답**할 수 있도록 한다.
+
+
+
+## 3. Spring Data와 Spring Data Reactive의 차이
+
+***
+
+**Spring Data**는 Java 애플리케이션의 **데이터 접근을 단순화하고 향상시키는 것을 목표**로 하는 Spring Framework의 프로젝트 중 하나이다. Spring Data는 보일러 플레이트 코드를 줄이고 모범 사례를 촉진하여 코드를 단순화하는 공통 추상화 및 기능을 제공한다.
+
+[Spring Data Pagination example](https://www.baeldung.com/spring-data-jpa-pagination-sorting)에서 설명했듯이 _page, size, sort_ 로 구성된 [_PageRequest_](https://docs.spring.io/spring-data/commons/docs/current/api/org/springframework/data/domain/PageRequest.html)를 사용하여 페이지를 구성하고 요청할 수 있다. Spring Data에는 pagination과 sorting 추상화를 사용하여 엔티티 검색 메서드를 제공하는 [_PagingAndSortingRepository_](https://docs.spring.io/spring-data/data-commons/docs/current/api/org/springframework/data/repository/PagingAndSortingRepository.html) 인터페이스가 정의되어 있다. 해당 Repository의 메서드에서 [_Page_](https://docs.spring.io/spring-data/data-commons/docs/current/api/org/springframework/data/domain/Page.html) 정보를 반환하기 위해 [_Pageable_](https://docs.spring.io/spring-data/data-commons/docs/current/api/org/springframework/data/domain/Pageable.html)과 [_Sort_](https://docs.spring.io/spring-data/data-commons/docs/current/api/org/springframework/data/domain/Sort.html) 객체를 사용할 수 있다. _Page_ 객체에는 내부적으로 쿼리를 실행할 때 사용되는 _totalElements_와 _totalPages_ 속성이 포함되어 있다. 이 정보들은 다음 페이지를 요청할 때 사용될 수 있다.
+
+반면에, **Spring Data Reactive**는 **pagination을 완전하게 지원하지는 않는다.** 이러한 이유는 Spring Reactive는 비동기 논블로킹을 지원하므로 **특정 페이지 크기에 해당하는 모든 데이터가 반환될 때까지 블로킹이 되면 효율적이지 않기 때문**이다. 그러나 Spring Data Reacrive는 여전히 _Pageable_을 지원한다. _PageRequest_ 객체를 사용하여 특정 데이터의 청크와 데이터의 개수를 조회하도록 구성할 수 있다.&#x20;
+
+페이지와 레코드에 대한 메타데이터가 포함된 Spring Data를 사용할 때 Page 대신 Flux로 구성된 응답을 받을 수 있다.
+
+
+
+## 4. WebFlux와 Data Reactive를 활용한 Pagination 예제 코드
+
+***
+
+_Page_와 _Size_ 정보를 갖고 있는 _Pageable_ 객체를 통해 Repository로부터 페이징된 목록을 조회할 수 있다.
 
 ```kotlin
-@Configuration
-@EnableTransactionManagement
-class PersistenceJPAConfig {
-    
-    @Bean
-    fun entityManagerFactory(): LocalContainerEntityManagerFactoryBean {
-        // ...
-    }
-    
-    @Bean
-    fun transactionManager(): PlatformTransactionManager {
-        val transactionManager = JpaTransactionManager()
-        transactionManager.setEntityManager(entityManagerFactory().getObject())
-        return transactionManager
-    }
+@Repository
+interface NotificationRepository : CoroutineCrudRepository<NotificationEntity, UUID> {
+
+    suspend fun findAllByReceiverIdOrderByNotifiedDateDesc(
+        receiverId: UUID,
+        pageable: Pageable,
+    ): Flow<NotificationEntity>
+
+    suspend fun countByReceiverId(
+        receiverId: UUID,
+    ): Long
 }
 ```
 
-* spring-data-\* 또는 spring-tx 의존이 있는 경우에는 기본적으로 트랜잭션이 활성화된다.
+* 페이징 정보와 별도로 전체 개수를 조회할 수 있도록 구성함
 
-## 3. _@Transactional_ 어노테이션
 
-클래스나 메서드에 _@Transactional_ 어노테이션을 정의할 수 있다.
+
+Repository로부터 페이징된 리스트를 조회하기 위해 다음과 같이 _PageRequest.of_를 활용하여 _Pageable_ 객체를 생성한다.
+
+```kotlin
+data class GetNotificationsRequest(
+    val memberId: UUID,
+    private val page: Int,
+    private val size: Int,
+) {
+    val pageable: Pageable = PageRequest.of(page, size)
+}
+```
+
+```kotlin
+@Component
+class NotificationQueryAdapter(
+    private val notificationRepository: NotificationRepository,
+) : LoadNotificationPort {
+
+    override suspend fun loadCount(memberId: UUID): Long =
+        notificationRepository.countByReceiverId(memberId)
+
+    override suspend fun loadNotifications(request: GetNotificationsRequest): Flow<Notification> =
+        notificationRepository
+            .findAllByReceiverIdOrderByNotifiedDateDesc(request.memberId, request.pageable)
+            .map { it.toDomain() }
+}
+```
+
+
+
+그 후 조회된 결과와 전체 개수로 PageImpl 객체를 생성한다.
 
 ```kotlin
 @Service
-@Transactional
-class FooService {
-	// ...
+class NotificationQueryService(
+    private val loadNotificationPort: LoadNotificationPort,
+) : GetNotificationUseCase {
+
+    override suspend fun getNotifications(request: GetNotificationsRequest): Page<NotificationResponse> {
+        val notifications = loadNotificationPort.loadNotifications(request).map { it.toResponse() }
+        val count = loadNotificationPort.loadCount(request.memberId)
+        return PageImpl(notifications.toList(), request.pageable, count)
+    }
+
 }
 ```
 
-* 다음과 같은 설정도 지원한다.
-  *   _Propagation Type :_ 전파 유형
 
-      ```kotlin
-      @Transactional(propagation = Propagation.REQUIRED)
-      ```
 
-      * _REQUIRED_ : 기본 값. 현재 트랜잭션이 존재하면 그 트랜잭션에 참여, 존재하지 않으면 새로운 트랜잭션을 시작
-      * _REQUIRES\_NEW_ : 항상 새로운 트랜잭션을 시작. 현재 트랜잭션이 존재하면 일시 중단.
-      * _SUPPORTS_ : 현재 트랜잭션이 존재하면 그 트랜잭션에 참여, 존재하지 않으면 트랜잭션 없이 실행
-      * _NOT\_SUPPORTS_ : 트랜잭션이 존재하면 일시 중단하고 트랜잭션 없이 실행
-      * _MANDATORY_ : 반드시 트랜잭션 내에서 실행되어야 함. 트랜잭션이 없으면 예외
-      * _NEVER_ : 트랜잭션이 없어야 실행. 트랜잭션이 존재하면 예외
-      * _NESTED_ : 현재 트랜잭션이 존재하면 중첩된 트랜잭션을 시작, 존재하지 않으면 새로운 트랜잭션을 시작.
-  *   _Isolation Level :_ 격리 수준
-
-      ```kotlin
-      @Transactional(propagation = Propagation.REQUIRED)
-      ```
-
-      * _DEFAULT_ : 데이터베이스의 격리 수준을 따름
-      * _READ\_UNCOMMITTED_ : 다른 트랜잭션에서 커밋되지 않은 변경 내용도 읽음
-      * _READ\_COMMITTED_ : 다른 트랜잭션에서 커밋된 데이터만 읽음
-      * _REPEATABLE\_READ_ : 트랜잭션 동안 읽은 데이터가 변경되지 않도록 보장
-      * _SERIALIZABLE_ : 가능 높은 격리 수준으로, 완벽한 읽기 일관성 보장
-  *   _Timeout_ : 시간 초과
-
-      ```kotlin
-      @Transactional(timeout = 5) // 5초
-      ```
-  *   _readOnly_ : 읽기 전용
-
-      ```kotlin
-      @Transactional(readOnly = true)
-      ```
-  *   _Rollback_ : 롤백 규칙
-
-      ```kotlin
-      // 롤백할 예외를 지정할 때 사용
-      @Transactional(rollbackFor = Exception.class)
-
-      // 롤백하지 않을 예외를 지정할 때 사용
-      @Transactional(noRollbackFor = IllegalArgumentException.class)
-      ```
-
-      * 특정 예외가 발생할 때 트랜잭션을 롤백하도록 설정
-
-## 4. 잘못된 사용
-
-### 4.1. 트랜잭션과 프록시
-
-Spring은 _@Transactional_ 이 붙은 모든 클래스에 대한 프록시를 생성한다. Spring은 프록시를 활용해 트랜잭션을 시작하고 커밋하기 위해 메서드 실행 전후에 트랜잭션 로직을 실행한다.
-
-위와 같은 특성으로 인해 @Transactional 을 사용할 때 두 가지의 주의할 점이 있다.
-
-첫 번째는 클래스 내에서 자기 자신의 메서드를 호출하는 경우에는 _@Transactional_ 이 정상 동작하지 않는 것이다. _@Transactional_ 이 붙은 빈은 트랜잭션 관리를 위해 Spring이 자동으로 생성하는 프록시 객체를 통해 호출되는데 내부 호출은 프록시를 거치지 않기 때문에 트랜잭션이 동작하지 않는 것이다.
-
-즉, 다음과 같이 호출할 경우 @Transactional 이 동작하지 않게 된다.
+Page 정보를 곧바로 응답하면 에러가 발생하므로, 다음과 같이 PageResponse 사용자 정의 객체로 변환하여 응답한다.
 
 ```kotlin
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-@Service
-public class TransactionalService {
-
-    @Transactional
-    public void methodA() {
-        // Do something that requires a transaction
-        System.out.println("methodA - Transaction started");
-        methodB(); // Self-invocation
+data class PageResponse<T>(
+    val data: List<T>,
+    val pageable: PageableResponse,
+) {
+    companion object {
+        fun <T> Page<T>.toResponse() =
+            PageResponse(
+                data = this.content,
+                pageable = this.toPageable(),
+            )
     }
 
-    @Transactional
-    public void methodB() {
-        // Do something else that requires a transaction
-        System.out.println("methodB - Transaction started");
+    data class PageableResponse(
+        val totalPages: Int,
+        val totalElements: Long,
+    ) {
+        companion object {
+            fun Page<*>.toPageable() =
+                PageableResponse(
+                    totalPages = this.totalPages,
+                    totalElements = this.totalElements
+                )
+        }
     }
 }
 ```
 
-두 번째로 주의할 점은 _public_ 메서드에만 _@Transactional_ 을 붙어야 한다는 것이다. 다른 가시성에 대해서는 프록시가 동작하지 않으므로 _@Transactional_ 이 무시된다.
-
-### 4.2. Isolation Level 변경
-
-다음과 같이 트랜잭션의 isolation level을 변경할 수 있다.
-
 ```kotlin
-@Transactional(isolation = Isolation.SERIALIZABLE)
+@RestController
+class NotificationRouter(
+    private val getMemberUseCase: GetMemberUseCase,
+    private val getNotificationUseCase: GetNotificationUseCase,
+) {
+
+    @GetMapping("/notifications")
+    suspend fun getNotifications(
+        @RequestHeader(AUTHORIZATION)
+        authorization: String,
+        @RequestParam(name = "page", defaultValue = "0")
+        page: Int,
+        @RequestParam(name = "size", defaultValue = "10")
+        size: Int,
+    ): PageResponse<NotificationResponse> {
+        val memberId: UUID = getMemberUseCase.getMemberIdBy(authorization)
+        val request = GetNotificationsRequest(memberId, page, size)
+        val notifications: Page<NotificationResponse> = getNotificationUseCase.getNotifications(request)
+        return notifications.toResponse()
+    }
+
+}
 ```
 
-* 이는 Spring 4.1에서 도입되어 이전 버전에서는 예외가 발생한다.
 
-### 4.3. Read-Only 트랜잭션
 
-다음과 같이 트랜잭션에 Read-Only를 설정할 수 있다.
+## 5. 예제 저장소
 
-```kotlin
-@Transactional(readOnly = true)
-```
+***
 
-* 주의할 점은 _readOnly_가 true로 설정되어 있어도 삽입이나 업데이터가 발생하지 않을 것이라고 확신할 수 없다는 것이다. 이는 구현체에 따라 다르다.
-
-_readOnly_ 는 트랜잭션 내부에서만 동작하므로 트랜잭션 컨텍스트 외부에서 작업이 발생하면 _readOnly_가 무시된다.
-
-```kotlin
-@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-```
-
-* 이처럼 트랜잭션 컨텍스트가 아닐 경우에는 readOnly가 무시될 수 있다.
-
-### 4.4. 트랜잭션 로깅
-
-트랜잭션 관련 문제를 디버깅 할 때 유용한 방법은 트랜잭션 패키지에 대한 로깅을 수정하는 것이다.
-
-패키지는 _“org.springframework.transaction”_ 이며, _TRACE_ 로 로깅 레벨을 설정하면 된다.
-
-## 5. 동작 원리
-
-{% embed url="https://www.marcobehler.com/guides/spring-transaction-management-transactional-in-depth" %}
+{% embed url="https://github.com/LeeSM0518/notification-service/commit/a1bfabd573a3fb89b5c293eb4cc969400101317b" %}
 
 ## 6. 참고
 
-{% embed url="https://www.baeldung.com/transaction-configuration-with-jpa-and-spring" %}
+***
+
+{% embed url="https://www.baeldung.com/spring-data-webflux-pagination" %}
+
