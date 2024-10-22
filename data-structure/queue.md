@@ -73,3 +73,11 @@ fun solution(progresses: IntArray, speeds: IntArray): IntArray {
 }
 ```
 
+
+
+## 참고
+
+{% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/42586?language=kotlin" %}
+기능 개발
+{% endembed %}
+

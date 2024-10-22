@@ -5,7 +5,7 @@ coverY: 0
 
 # Stack
 
-괄 ㅎ괄 개념
+## 개념
 
 먼저 들어간 것이 마지막에 나오는 선입후출(FILO, First In Last Out) 방식
 
