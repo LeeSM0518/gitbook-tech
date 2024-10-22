@@ -28,6 +28,7 @@
 ## Algorithm
 
 * [Stack](algorithm/stack.md)
+* [Queue](algorithm/queue.md)
 
 ## ETC
 

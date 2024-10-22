@@ -5,7 +5,7 @@ coverY: 0
 
 # Stack
 
-## 개념
+괄 ㅎ괄 개념
 
 먼저 들어간 것이 마지막에 나오는 선입후출(FILO, First In Last Out) 방식
 
@@ -87,3 +87,10 @@ class Solution {
 }
 ```
 
+
+
+## 참고
+
+{% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/76502?language=kotlin" %}
+괄호 회전하기
+{% endembed %}
