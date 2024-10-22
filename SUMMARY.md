@@ -25,6 +25,10 @@
 * [레디스 운영 시 고려사항](<README (1).md>)
 * [레디스 튜닝](redis/undefined-1.md)
 
+## Algorithm
+
+* [Stack](algorithm/stack.md)
+
 ## ETC
 
 * [GitHub과 Jira 연동](etc/github-jira.md)
