@@ -27,4 +27,4 @@
 
 ## ETC
 
-* [Github과 Jira 연동](etc/github-jira.md)
+* [GitHub과 Jira 연동](etc/github-jira.md)

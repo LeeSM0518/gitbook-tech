@@ -90,7 +90,7 @@ coverY: 0
 
 각 항목별로 필수 제공 항목과 추가 제공 항목 중에 선택할 수 있다.
 
-<figure><img src=".gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -325,7 +325,7 @@ _**요청 헤더**_
 
 _**일반적인 회원 데이터베이스 구조**_
 
-<figure><img src=".gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
 
 
 
