@@ -24,8 +24,9 @@
 ## Data Structure
 
 * [Stack](data-structure/stack.md)
-* [Queue](data-structure/queue.md)
+* [Queue](data-structure/queue.md)
 * [Hash](data-structure/hash.md)
+* [Tree](data-structure/tree.md)
 
 ## ETC
 
