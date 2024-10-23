@@ -25,9 +25,10 @@
 
 * [Stack](data-structure/stack.md)
 * [Queue](data-structure/queue.md)
-* [Hash](data-structure/hash.md)
+* [Hash](data-structure/hash.md)
 * [Tree](data-structure/tree.md)
-* [Set](data-structure/set.md)
+* [Set](data-structure/set.md)
+* [Graph](data-structure/graph.md)
 
 ## ETC
 

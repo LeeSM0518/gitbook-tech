@@ -3,7 +3,7 @@ cover: ../.gitbook/assets/Frame 81.png
 coverY: 0
 ---
 
-# Set
+# Set
 
 ## 개념
 
@@ -96,4 +96,12 @@ fun solution(nums: IntArray): Int {
     return minOf(uniqueCount, maxSelect)
 }
 ```
+
+
+
+## 참고
+
+{% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/1845" %}
+폰켓몬
+{% endembed %}
 
