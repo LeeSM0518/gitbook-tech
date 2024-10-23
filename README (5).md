@@ -90,7 +90,7 @@ coverY: 0
 
 각 항목별로 필수 제공 항목과 추가 제공 항목 중에 선택할 수 있다.
 
-<figure><img src=".gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -325,7 +325,7 @@ _**요청 헤더**_
 
 _**일반적인 회원 데이터베이스 구조**_
 
-<figure><img src=".gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (4) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -351,7 +351,7 @@ create table users (
 
 _**네이버 로그인 연동을 위한 테이블 구성**_
 
-<figure><img src=".gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -394,7 +394,7 @@ where a.id = b.id and b.sns_id = :snsId
 
 _**네이버 로그인 연동을 위한 테이블 구성**_
 
-<figure><img src=".gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (6) (1).png" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -807,7 +807,7 @@ _**응답 정보**_
 
 먼저 [애플리케이션 등록](https://developers.naver.com/apps/#/register?api=nvlogin)을 수행한다.
 
-<figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (7) (1).png" alt=""><figcaption></figcaption></figure>
 
 * 등록한 후에 Client ID와 Client Secret 정보를 복사하여 사용한다.
 

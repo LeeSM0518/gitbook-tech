@@ -27,6 +27,7 @@
 * [Queue](data-structure/queue.md)
 * [Hash](data-structure/hash.md)
 * [Tree](data-structure/tree.md)
+* [Set](data-structure/set.md)
 
 ## ETC
 
@@ -34,4 +35,4 @@
 
 ## CI/CD
 
-* [Github Actions & AWS](<README (3).md>)
+* [Github과 AWS를 연동하여 CI/CD 구축](ci-cd/github-aws-ci-cd.md)
