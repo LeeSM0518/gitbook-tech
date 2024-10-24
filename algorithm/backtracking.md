@@ -100,6 +100,7 @@ fun main() {
 
 ## 참고
 
-{% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/76502?language=kotlin" %}
-괄호 회전하기
+{% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/87946?language=kotlin" %}
+피로도
 {% endembed %}
+

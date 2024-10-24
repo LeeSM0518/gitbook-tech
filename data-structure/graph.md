@@ -530,3 +530,12 @@ fun main() {
     println(solution(maps))
 }
 ```
+
+
+
+## 참고
+
+{% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/1844" %}
+게임 맵 최단거리
+{% endembed %}
+
