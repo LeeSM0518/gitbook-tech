@@ -468,8 +468,65 @@ ROR 게임은 두 팀으로 나누어서 진행하며 상대 팀 진영을 먼�
 
 <table><thead><tr><th width="454">maps</th><th>answer</th></tr></thead><tbody><tr><td>[[1,0,1,1,1],[1,0,1,0,1],[1,0,1,1,1],[1,1,1,0,1],[0,0,0,0,1]]</td><td>11</td></tr><tr><td>[[1,0,1,1,1],[1,0,1,0,1],[1,0,1,1,1],[1,1,1,0,0],[0,0,0,0,1]]</td><td>-1</td></tr></tbody></table>
 
-### 코드
+#### 코드
 
 ```kotlin
-```
+fun main() {
+    class Node(val row: Int, val col: Int)
 
+    fun solution(maps: List<List<Int>>): Int {
+        // 1. 이동할 수 있는 방향을 나타내는 리스트 생성
+        val direction = listOf(0 to 1, 0 to -1, 1 to 0, -1 to 0)
+
+        // 2. 맵의 크기를 저장
+        val n = maps.size
+        val m = maps[0].size
+
+        // 3. 최단 거리를 저장할 배열 생성
+        val distance = MutableList(n) { MutableList(m) { 0 } }
+
+        // 4. bfs 탐색을 위한 큐 생성
+        val queue = ArrayDeque<Node>()
+
+        // 5. 시작 정점에 대해서 큐에 추가, 최단 거리 저장
+        queue.addLast(Node(0, 0))
+        distance[0][0] = 1
+
+        // 6. queue가 빌 때까지 반복
+        while (queue.isNotEmpty()) {
+            val now = queue.removeFirst()
+
+            // 7. 현재 위치에서 이동할 수 있는 모든 방향
+            for (i in 0..3) {
+                val nextRow = now.row + direction[i].first
+                val nextCol = now.col + direction[i].second
+
+                // 8. 맵 밖으로 나가는 경우 예외 처리
+                if (nextRow < 0 || nextCol < 0 || nextRow >= n || nextCol >= m) continue
+
+                // 9. 벽으로 가는 경우 예외 처리
+                if (maps[nextRow][nextCol] == 0) continue
+
+                // 10. 이동한 위치가 처음 방문하는 경우, queue에 추가하고 거리 갱신
+                if (distance[nextRow][nextCol] == 0) {
+                    queue.addLast(Node(nextRow, nextCol))
+                    distance[nextRow][nextCol] = distance[now.row][now.col] + 1
+                }
+                distance.forEach { it.forEach { print("$it ") }; println() }
+                println()
+            }
+        }
+
+        return if (distance[n - 1][m - 1] == 0) -1 else distance[n - 1][m - 1]
+    }
+
+    val maps = listOf(
+        listOf(1, 0, 1, 1, 1),
+        listOf(1, 0, 1, 0, 1),
+        listOf(1, 0, 1, 1, 1),
+        listOf(1, 1, 1, 0, 1),
+        listOf(0, 0, 0, 0, 1)
+    )
+    println(solution(maps))
+}
+```
