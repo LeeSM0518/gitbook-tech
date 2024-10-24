@@ -21,6 +21,14 @@
 * [레디스 운영 시 고려사항](<README (1).md>)
 * [레디스 튜닝](redis/undefined-1.md)
 
+## CI/CD
+
+* [Github과 AWS를 연동하여 CI/CD 구축](ci-cd/github-aws-ci-cd.md)
+
+## Algorithm
+
+* [Backtracking](algorithm/backtracking.md)
+
 ## Data Structure
 
 * [Stack](data-structure/stack.md)
@@ -33,7 +41,3 @@
 ## ETC
 
 * [GitHub과 Jira 연동](etc/github-jira.md)
-
-## CI/CD
-
-* [Github과 AWS를 연동하여 CI/CD 구축](ci-cd/github-aws-ci-cd.md)
