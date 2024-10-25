@@ -29,6 +29,7 @@
 
 * [Backtracking](algorithm/backtracking.md)
 * [Sort](algorithm/sort.md)
+* [Simulation](algorithm/simulation.md)
 
 ## Data Structure
 
