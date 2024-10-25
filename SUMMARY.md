@@ -30,6 +30,7 @@
 * [Backtracking](algorithm/backtracking.md)
 * [Sort](algorithm/sort.md)
 * [Simulation](algorithm/simulation.md)
+* [Dynamic Programming](algorithm/dynamic-programming.md)
 
 ## Data Structure
 
