@@ -3,7 +3,7 @@ cover: ../.gitbook/assets/Frame 81.png
 coverY: 0
 ---
 
-# Queue
+# Queue
 
 ## 개념
 
@@ -75,9 +75,79 @@ fun solution(progresses: IntArray, speeds: IntArray): IntArray {
 
 
 
+## 문제 2. 카드 뭉치
+
+### 설명
+
+코니는 영어 단어가 적힌 카드 뭉치 2개를 선물로 받았습니다. 코니는 다음과 같은 규칙으로 카드에 적힌 단어들을 사용해 원하는 순서의 단어 배열을 만들 수 있는지 알고 싶습니다.
+
+* 원하는 카드 뭉치에서 카드를 순서대로 한 장씩 사용합니다.
+* 한 번 사용한 카드는 다시 사용할 수 없습니다.
+* 카드를 사용하지 않고 다음 카드로 넘어갈 수 없습니다.
+* 기존에 주어진 카드 뭉치의 단어 순서는 바꿀 수 없습니다.
+
+### 제약 조건
+
+* 1 <= cars1 의 길이, cards2 의 길이 <= 10
+  * 1 <= cards1\[i] 의 길이, cards2\[i] 의 길이 <= 10
+  * cards1과 cards2에는 서로 다른 단어만 있음
+* 2 <= goal의 길이 <= cards1의 길이 + cards2의 길이
+  * 1 <= gaol\[i]의 길이 <= 10
+  * goal의 원소는 cards1과 cards2의 원소들로만 이루어져 있음
+* cards1, cards2, goal의 문자열들은 모두 알파벳 소문자로만 이루어져 있음
+
+### 입출력의 예
+
+| cards1                   | cards2          | goal                                   | result |
+| ------------------------ | --------------- | -------------------------------------- | ------ |
+| \["i", "drink", "water"] | \["want", "to"] | \["i", "want", "to", "drink", "water"] | "Yes"  |
+| \["i", "water", "drink"] | \["want", "to"] | \["i", "want", "to", "drink", "water"] | "No"   |
+
+### 코드
+
+```kotlin
+fun solution(
+    cards1: Array<String>,
+    cards2: Array<String>,
+    goal: Array<String>,
+): String {
+    //  첫 번째 카드 뭉치의 문자열 위치를 저장할 card1Index 변수 선언 후 0 저장
+    var card1Index = 0
+    //  두 번째 카드 뭉치의 문자열 위치를 저장할 card2Index 변수 선언 후 0 저장
+    var card2Index = 0
+    // 일치 횟수를 저장할 변수 선언 후 0 저장
+    var count = 0
+    //  goal 배열 순회
+    for (string in goal) {
+        //      goal 문자열과 첫 번째 카드 뭉치의 card1Index 위치 문자열과 일치하는지 확인
+        //          일치할 경우
+        //              card1Index 1 증가, count 1 증가
+        if (card1Index < cards1.size && string == cards1[card1Index]) {
+            card1Index++
+            count++
+        }
+        //      goal 문자열과 두 번째 카드 뭉치의 card2Index 위치 문자열과 일치하는지 확인
+        //          일치할 경우
+        //              card2Index 1 증가, count 1 증가
+        else if (card2Index < cards2.size && string == cards2[card2Index]) {
+            card2Index++
+            count++
+        }
+    }
+    //  count와 goal 크기와 같을 경우 Yes 아닐 경우 No 반환
+    return if (goal.size == count) "Yes" else "No"
+}
+```
+
+
+
 ## 참고
 
 {% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/42586?language=kotlin" %}
 기능 개발
+{% endembed %}
+
+{% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/159994" %}
+카드 뭉치
 {% endembed %}
 
