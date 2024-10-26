@@ -3,7 +3,7 @@ cover: ../.gitbook/assets/Frame 81.png
 coverY: 0
 ---
 
-# Hash
+# Hash
 
 ## 개념
 
@@ -72,4 +72,84 @@ fun solution(participant: List<String>, completion: List<String>): String {
     return result
 }
 ```
+
+
+
+## 문제 2. 할인 행사
+
+### 설명
+
+XYZ 마트는 일정 금액을 지불하면 10일 동안 회원 자격을 부여합니다. XYZ 마트에서는 회원을 대상으로 매일 1가지 제품을 할인하는 행사를 합니다. 할인 제품은 하루에 하나만 구매할 수 있습니다. 알뜰한 정현이는 자신이 원하는 제품과 수량이 할인하는 날짜와 10일 연속으로 일치할 때에 맞춰서 회원가입을 하려 합니다.
+
+예를 들어 정현이가 원하는 제품이 바나나 3개, 사과 2개, 쌀 2개, 돼지고기 2개, 냄비 1개이고, XYZ 마트에서 14일간 회원을 대상으로 할인하는 제품이 날짜 순서대로 치킨, 사과, 사과, 바나나, 쌀, 사과, 돼지고기, 바나나, 돼지고기, 쌀, 냄비, 바나나, 사과, 바나나면 첫째 날부터 열흘 동안 냄비는 할인하지 않으므로 첫째 날에는 회원가입을 하지 않습니다. 셋째, 넷째, 다섯째 날부터 각각 열흘 동안은 원하는 제품과 수량이 일치하므로 셋 중 하루에 회원가입을 합니다.
+
+정현이가 원하는 제품을 나타내는 문자열 배열 want와 정현이가 원하는 제품의 수량을 나타내는 정수 배열 number, XYZ 마트에서 할인하는 제품을 나타내는 문자열 배열 discount가 있을 때 회원가입 시 정현이가 원하는 제품을 모두 할인받을 수 있는 회원 등록 날짜의 총 일수를 반환하는 solution() 함수를 완성하세요. 가능한 날이 없으면 0을 return 합니다.
+
+### 제약 조건
+
+* 1 <= want 의 길이 = number 의 길이 <= 10
+  * 1 <= number 의 원소 <= 10
+  * number\[i] 는 want\[i]의 수량
+  * number의 총합 10
+* 10 <= discount의 길이 <= 100,000
+* want와 discount의 원소들은 알파벳 소문자로 이루어진 문자열
+  * 1 <= want의 원소의 길이, discount의 원소의 길이 <= 12
+
+### 입출력의 예
+
+| want                                        | number           | discount                                                                                                                        | result |
+| ------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| \["banana", "apple", "rice", "pork", "pot"] | \[3, 2, 2, 2, 1] | \["chicken", "apple", "apple", "banana", "rice", "apple", "pork", "banana", "pork", "rice", "pot", "banana", "apple", "banana"] | 3      |
+| \["apple"]                                  | \[10]            | \["banana", "banana", "banana", "banana", "banana", "banana", "banana", "banana", "banana", "banana"]                           | 0      |
+
+### 코드
+
+```kotlin
+fun solution(
+    want: Array<String>,
+    number: IntArray,
+    discount: Array<String>,
+): Int {
+    var answer = 0
+    //  want를 key로 number를 value로 하는 map 생성
+    val map = mutableMapOf<String, Int>()
+    //  map에 want와 number를 입력
+    for (i in want.indices) {
+        map[want[i]] = number[i]
+    }
+    //  할인 목록을 저장할 queue 생성
+    val queue = ArrayDeque<String>()
+    //  discount 순회
+    for (s in discount) {
+        //      queue의 길이가 10 이상인가?
+        if (queue.size >= 10) {
+            //          맞을 경우
+            //              queue의 첫 번째를 꺼내서 map에 동일한 key의 value를 1 증가
+            val first = queue.removeFirst()
+            map[first]?.also { map[first] = it + 1 }
+        }
+        //      map에서 discount와 동일한 key의 value를 1 감소
+        map[s]?.also { map[s] = it - 1 }
+        //      queue의 마지막으로 discount 입력
+        queue.addLast(s)
+        //      map의 모든 value가 모두 0인가?
+        if (map.values.none { it != 0 }) {
+            //          맞을 경우 answer를 1 증가
+            answer++
+        }
+    }
+
+    return answer
+}
+```
+
+## 참고
+
+{% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/42576" %}
+완주하지 못한 선수
+{% endembed %}
+
+{% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/131127" %}
+할인 행사
+{% endembed %}
 
