@@ -59,6 +59,38 @@ fibodata[N] 반환
 
 
 
+피보나치 구현 코드
+
+```kotlin
+val n = 5
+
+// 메모이제이션을 위한 배열 선언, 0으로 초기화
+val fibodata = IntArray(n + 1) { 0 }
+
+// 메서드 정의
+fun fibonacci(n: Int): Int {
+    // 메모이제이션 활용
+    if (fibodata[n] != 0) {
+        return fibodata[n]
+    }
+    // 메모이제이션, 종료 조건
+    else if (n <= 2) {
+        fibodata[n] = 1
+        return 1
+    }
+    // 메모이제이션, 일반항
+    else {
+        fibodata[n] = fibonacci(n - 1) + fibonacci(n - 2)
+        return fibodata[n]
+    }
+}
+
+val result = fibonacci(n)
+println(result)
+```
+
+
+
 ### 최장 증가 부분 수열
 
 부분 수열이란 주어진 수열 중 일부를 뽑아 새로 만든 수열을 말한다. 이때 각각의 원소는 전후 관계를 유지해야 한다.
@@ -97,48 +129,62 @@ LCS의 길이를 구할 때는 2가지 조건을 검사해야 한다.
 LCS의 길이를 반환하는 LCS() 함수를 다음과 같이 정의한다.
 
 * `LCS(i, j)` = `x[1...i]` 와 `y[1...j]` 의 LCS의 길이
+* `x[i]` 와 `y[j]` 가 다르면 LCS(i, j) = LCS(i - 1, j) 와 LCS(i, j - 1)을 비교하여 큰 값으로 함
+
+즉, LCS(i, j)의 점화식은 이렇게 정의할 수 있다.
+
+* `LCS(0, 0) = 0`
+* `x[i] == y[j]` 이면 `LCS(i-1, j-1) + 1`
+* `x[i] != y[j]` 이면 `max(LCS(i-1), j), LCS(i, j-1))`
+
+총 연산 횟수는 dp를 채우는 것과 같으므로 O(N \* M) 이다.
 
 
 
-## 문제 1. 이진 변환 반복하기
+## 문제 1. 피보나치 수
 
 ### 설명
 
-0과 1로 이루어진 어떤 문자열 x에 대한 이진 변환을 다음과 같이 정의합니다.
-
-1. x의 모든 0을 제거한다.
-2. x의 길이를 c라고 하면 x를 'c를 2진법으로 표현한 문자열'로 바꾼다.
-
-예를 들어 x = "0111010" 이면 이진 변환 과정은 "0111010" -> "1111" -> "100" 입니다. 0과 1로 이루어진 문자열 s가 주어지고 s가 "1"이 될 때까지 계속해서 이진 변환을 할 때 이진 변환의 횟수와 변환 과정에서 제거된 모든 0의 개수를 배열에 담아 반환하는 solution() 함수를 완성해주세요.
+2 이상의 n이 입력되었을 때 n 번째 피보나치 수를 1234567로 나눈 나머지를 반환하는 solution() 함수를 완성하세요.
 
 
 
 ### 제약 조건
 
-* s의 길이는 1 이상 150,000 이하입니다.
-* s에는 '1'이 하나 이상 포함되어 있습니다.
+* n은 2 이상 100,000 이하인 자연수입니다.
 
 
 
 ### 입출력의 예
 
-| s                | result  |
-| ---------------- | ------- |
-| `"110010101001"` | `[3,8]` |
-| `"01110"`        | `[3,3]` |
-| `"1111111"`      | `[4,1]` |
+| n   | return |
+| --- | ------ |
+| `3` | `2`    |
+| `5` | `5`    |
+
+피보나치 수는 0번째부터 0, 1, 1, 2, 3, 5, ... 와 같이 이어집니다.
 
 
 
 ### 코드
 
 ```kotlin
+fun solution(n: Int): Int {
+    val fibodata = IntArray(n + 1) { 0 }
+    fibodata[1] = 1
+
+    for (i in 2..n) {
+        fibodata[i] = (fibodata[i - 1] + fibodata[i - 2]) % 1234567
+    }
+
+    return fibodata[n]
+}
 ```
 
 
 
 ## 참고
 
-{% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/70129" %}
-이진 변환 반복하기
+{% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/12945" %}
+피보나치 수
 {% endembed %}
