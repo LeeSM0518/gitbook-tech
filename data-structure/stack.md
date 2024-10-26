@@ -89,8 +89,83 @@ class Solution {
 
 
 
+## 문제 2. 짝지어 제거하기
+
+### 설명
+
+알파벳 소문자로 구성된 문자열에서 같은 문자열이 2개 붙어 있는 짝을 찾습니다. 짝을 찾은 다음에는 그 둘을 제거한 뒤 앞뒤로 문자열을 이어 붙입니다. 이 과정을 반복해서 문자열을 모두 제거한다면 짝지어 제거하기가 종료됩니다. 문자열 S가 주어졌을 때 짝지어 제거하기를 성공적으로 수행할 수 있는지 반환하는 함수를 완성하세요. 성공적으로 수행할 수 있으면 1을, 아니면 0을 반환해주면 됩니다.
+
+### 제약 조건
+
+* 문자열의 길이 : 1,000,000 이하의 자연수
+* 문자열은 모두 소문자로 이루어져 있습니다.
+
+### 입출력의 예
+
+| s      | result |
+| ------ | ------ |
+| baabaa | 1      |
+| cdcd   | 0      |
+
+### 코드
+
+```kotlin
+fun main() {
+    fun solution(s: String): Int {
+        // 연결된 문자를 넣을 스택 정의
+        // 이전 문자열을 저장할 변수 정의 후 빈문자열 저장
+        // 변환 문자열을 저장할 변수 정의 후 원본 문자열 저장
+        // 변환 문자열이 빈 문자열이 아니고 이전 문자열과 변환 문자열이 동일하지 않을 때 까지 무한 반복
+        //  이전 문자열에 변환 문자열 저장
+        //  변환 문자열 순회
+        //      스택의 첫 번째 문자가 존재하는지 확인
+        //          존재하지 않을 경우
+        //              스택에 현재 문자를 추가
+        //              다음 문자로 이동
+        //          존재할 경우
+        //              스택의 첫 번째 문자와 현재 문자가 동일한지 확인
+        //                  동일할 경우
+        //                      스택에서 문자 제거
+        //                      다음 문자로 이동
+        //                  동일하지 않을 경우
+        //                      스택에 현재 문자 추가
+        //                      다음 문자로 이동
+        //  변환 문자열에 스택에 쌓인 문자들로 문자열 만든 후 저장
+        //  스택 초기화
+        // 변환 문자열이 빈 문자열일 경우 1을 빈 문자열이 아닐 경우 0을 반환
+        var stack = Stack<Char>()
+        var before = ""
+        var after = s
+        while (after.isNotEmpty() && before.equals(after).not()) {
+            before = after
+            for (current in after) {
+                if (stack.isEmpty()) {
+                    stack.push(current)
+                } else {
+                    if (stack.peek() == current) {
+                        stack.pop()
+                    } else {
+                        stack.push(current)
+                    }
+                }
+            }
+            after = stack.joinToString("")
+            stack.clear()
+        }
+        return if (after.isEmpty()) 1 else 0
+    }
+
+    println(solution("cdcd"))
+}
+```
+
 ## 참고
 
 {% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/76502?language=kotlin" %}
 괄호 회전하기
 {% endembed %}
+
+{% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/12973" %}
+짝지어 제거하기
+{% endembed %}
+
