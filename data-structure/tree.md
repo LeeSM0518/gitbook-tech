@@ -95,7 +95,7 @@ fun solution(n: Int, a: Int, b: Int): Int {
   * 어느 누구의 추천도 없이 조직에 참여한 사람에 대해서는 referral 배열 내에 추천인의 이름을 기입하지 않고 - 를 기입합니다.
   * enroll에 등장하는 이름은 조직에 참여한 순서에 따릅니다.
   * 즉, 어느 판매원의 이름이 enroll의 i번째에 등장한다면, 이 판매원을 조직에 참여시킨 사람의 이름, 즉 referral의 i 번째 노드는 이미 배열 enroll의 j번째 (j < i)에 등장했음이 보장됩니다.
-* selrr의 길이는 1 이상 100,000 이하입니다.
+* seller의 길이는 1 이상 100,000 이하입니다.
   * seller 내의 i번째에 있는 이름은 i번째 판매 집계 데이터가 어느 판매원에 의한 것인지를 나타냅니다.
   * seller에는 같은 이름이 중복해서 들어 있을 수 있습니다.
 * amount의 길이는 seller의 길이와 같습니다.
@@ -114,6 +114,56 @@ fun solution(n: Int, a: Int, b: Int): Int {
 ### 코드
 
 ```kotlin
+fun solution(
+        enroll: Array<String>,
+        referral: Array<String>,
+        seller: Array<String>,
+        amount: IntArray,
+    ): IntArray {
+        //  enroll과 referral를 저장할 treeHashMap 선언
+        val treeHashMap = hashMapOf<String, String>()
+        //  seller와 amount를 저장하기 위해 sellerList 선언
+        val sellerList = ArrayList<Pair<String, Int>>()
+        //  판매자와 이익금을 저장할 resultLinkedHashMap 선언
+        val resultLinkedHashMap = LinkedHashMap<String, Int>()
+        //  enroll 크기만큼 순회
+        for (i in enroll.indices) {
+            //      treeHashmap[enroll[i]]에 referral[i] 저장
+            treeHashMap[enroll[i]] = referral[i]
+            resultLinkedHashMap[enroll[i]] = 0
+        }
+        //  seller 크기만큼 순회
+        for (i in seller.indices) {
+            val realAmount = amount[i] * 100
+            sellerList.add(seller[i] to realAmount)
+        }
+
+        fun treeTraversal(key: String, value: Int) {
+            val profit = ceil((value * 0.9)).toInt()
+            val divideAmount = value - profit
+            if (divideAmount < 1) {
+                resultLinkedHashMap[key] = resultLinkedHashMap[key]!! + value
+                return
+            } else {
+                resultLinkedHashMap[key] = resultLinkedHashMap[key]!! + profit
+            }
+
+            //          treeHashMap[key].value 가 "-" 인가?
+            if (treeHashMap[key] != "-") {
+                //              아닐 경우 treeHashMap[key].value를 key로 하고 value * 0.1를 value로 재귀 함수 호출
+                treeTraversal(treeHashMap[key]!!, divideAmount)
+            } else {
+                //              맞을 경우 함수 종료
+                return
+            }
+        }
+        //  sellerList 순회
+        sellerList.forEach { (key, value) ->
+            //      sellerList[i]의 key와 value로 재귀 함수 호출
+            treeTraversal(key, value)
+        }
+        return resultLinkedHashMap.values.toIntArray()
+    }
 ```
 
 
