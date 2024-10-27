@@ -533,9 +533,85 @@ fun main() {
 
 
 
+## 문제 2. 네트워크
+
+### 설명
+
+네트워크란 컴퓨터 상호 간에 정보를 교환하도록 연결된 어떤 형태를 의미합니다. 예를 들어 컴퓨터 A, B가 직접 연결되어 있고 컴퓨터 B, C가 직접 연결되어 있을 때 컴퓨터 A, C는 간접 연결되어 있어 정보를 교환할 수 있습니다. 그러면 컴퓨터 A, B, C는 모두 같은 네트워크 상에 있다고 할 수 있습니다. 컴퓨터 개수가 n, 연결 정보가 담긴 2차원 배열 computers가 주어질 때 네트워크 개수를 반환하는 solution() 함수를 작성하세요.
+
+### 제약 조건
+
+* 컴퓨터의 개수 n은 1 이상 200 이하인 자연수입니다.
+* 각 컴퓨터는 0부터 n - 1인 정수로 표현합니다.
+* i번 컴퓨터와 j번 컴퓨터가 연결되어 있으면 computers\[i]\[j]를 1로 표현합니다.
+* computers\[i]\[i]는 항상 1입니다.
+
+### 입출력의 예
+
+| n | computers                             | return |
+| - | ------------------------------------- | ------ |
+| 3 | \[\[1, 1, 0], \[1, 1, 0], \[0, 0, 1]] | 2      |
+| 3 | \[\[1, 1, 0], \[1, 1, 1], \[0, 1, 1]] | 1      |
+
+### 코드
+
+```kotlin
+fun solution(n: Int, computers: Array<IntArray>): Int {
+    // 네트워크 수를 컴퓨터의 개수로 초기화
+    var count = computers.size
+    // computers 배열을 복제하여 그래프 생성
+    val graph = computers.clone()
+    // 컴퓨터 방문 여부를 저장할 배열 초기화
+    val visited = Array(count) { false }
+    // 자기 자신과의 연결을 제거 (대각선 요소를 0으로 설정)
+    for (i in graph.indices) {
+        graph[i][i] = 0
+    }
+
+    // 깊이 우선 탐색 함수 정의
+    fun dfs(i: Int, j: Int) {
+        // i와 j 사이의 연결을 제거하여 중복 방문 방지
+        graph[i][j] = 0
+        graph[j][i] = 0
+        // 컴퓨터 i를 방문으로 표시
+        visited[i] = true
+        // 컴퓨터 j가 방문되지 않았다면
+        if (!visited[j]) {
+            // 컴퓨터 j를 방문으로 표시하고 네트워크 수 감소
+            visited[j] = true
+            count--
+        }
+        // 컴퓨터 j에 연결된 모든 컴퓨터를 탐색
+        for (k in graph[j].indices) {
+            // 연결이 없으면 다음으로 이동
+            if (graph[j][k] == 0) continue
+            // 연결이 있으면 재귀적으로 dfs 호출
+            else dfs(j, k)
+        }
+    }
+
+    // 그래프를 순회하며 연결된 컴퓨터를 찾음
+    for (i in graph.indices) {
+        for (j in graph[i].indices) {
+            // i와 j가 연결되어 있으면 dfs 호출
+            if (graph[i][j] == 1) {
+                dfs(i, j)
+            }
+        }
+    }
+    return count
+}
+```
+
+
+
 ## 참고
 
 {% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/1844" %}
 게임 맵 최단거리
+{% endembed %}
+
+{% embed url="https://school.programmers.co.kr/learn/courses/30/lessons/43162" %}
+네트워크
 {% endembed %}
 
