@@ -298,6 +298,46 @@ curl -X "POST" "https://api.onesignal.com/apps/<APP_ID>/users" \
 
 
 
+어플 사용자 등록
+
+```bash
+curl -X "POST" "https://api.onesignal.com/apps/<APP_ID>/users" \
+     -H 'Content-Type: application/json; charset=utf-8' \
+     -d $'{
+  "subscriptions": [
+    {
+      "type": "iOSPush",
+      "token": "20bdb8fb3bdadc1bef037eefcaeb56ad6e57f3241c99e734062b6ee829271b71",
+      "enabled": true,
+      "notification_types": 1,
+      "session_time": 98,
+      "session_count": 6,
+      "sdk": "",
+      "device_model": "iPhone 14",
+      "device_os": "18.0",
+      "rooted": false,
+      "test_type": 1,
+      "app_version": "5.1.7",
+      "web_auth": "",
+      "web_p256": ""
+    }
+  ],
+  "properties": {
+    "country": "US",
+    "tags": {
+      "favoriteTeam": "Lakers"
+    },
+    "language": "EN"
+  },
+  "identity": {
+    "external_id": "test"
+  }
+}'
+
+```
+
+
+
 ## 참고
 
 {% embed url="https://documentation.onesignal.com/docs/quickstart-guide" %}
