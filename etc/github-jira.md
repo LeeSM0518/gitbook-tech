@@ -29,9 +29,9 @@ Github Repository에 브랜치를 생성하거나 커밋을 작성하여 올릴 
 
 <figure><img src="../.gitbook/assets/image (16).png" alt=""><figcaption><p>연결을 원하는 Repository 설정</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (1) (1).png" alt=""><figcaption><p>Jira에서 연결 결과 확인</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption><p>Jira에서 연결 결과 확인</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption><p>GitHub에서 연결 결과 확인</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption><p>GitHub에서 연결 결과 확인</p></figcaption></figure>
 
 
 
@@ -39,11 +39,11 @@ Github Repository에 브랜치를 생성하거나 커밋을 작성하여 올릴 
 
 1.  Jira 티켓 번호로 브랜치 생성
 
-    <figure><img src="../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption><p>DVK-53 티켓</p></figcaption></figure>
+    <figure><img src="../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption><p>DVK-53 티켓</p></figcaption></figure>
 
-    <figure><img src="../.gitbook/assets/image (2) (1).png" alt=""><figcaption><p>DVK-53 브랜치 생성 후 push</p></figcaption></figure>
+    <figure><img src="../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption><p>DVK-53 브랜치 생성 후 push</p></figcaption></figure>
 
 
 2.  연동 확인
 
-    <figure><img src="../.gitbook/assets/image (3) (1).png" alt=""><figcaption><p>Jira 티켓에 연결된 브랜치 확인</p></figcaption></figure>
+    <figure><img src="../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption><p>Jira 티켓에 연결된 브랜치 확인</p></figcaption></figure>
